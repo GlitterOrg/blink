@@ -1,0 +1,6 @@
+[
+    WillBeGarbageCollected,
+] interface ContentInlineSizeInfo {
+    readonly attribute double minContentInlineSize;
+    readonly attribute double maxContentInlineSize;
+};

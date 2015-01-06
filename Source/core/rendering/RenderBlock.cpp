@@ -70,6 +70,9 @@
 #include "wtf/StdLibExtras.h"
 #include "wtf/TemporaryChange.h"
 
+#include "core/dom/LayoutCallback.h"
+#include "platform/ScriptForbiddenScope.h"
+
 using namespace WTF;
 using namespace Unicode;
 
@@ -82,6 +85,7 @@ struct SameSizeAsRenderBlock : public RenderBox {
     RenderLineBoxList lineBoxes;
     int pageLogicalOffset;
     uint32_t bitfields;
+    Persistent<LayoutContext> context;
 };
 
 static_assert(sizeof(RenderBlock) == sizeof(SameSizeAsRenderBlock), "RenderBlock should stay small");
@@ -1371,9 +1375,45 @@ void RenderBlock::updateScrollInfoAfterLayout()
     }
 }
 
+LayoutContext* RenderBlock::ensureLayoutContext()
+{
+    if (!m_context)
+        m_context = new LayoutContext(toElement(node()));
+    return m_context.get(); 
+}
+
+void RenderBlock::customLayout()
+{
+    // FIXME: Implement poisining and checking.
+    // setWidth(-1);
+    // setHeight(-1);
+
+    Element* element = toElement(node());
+    LayoutCallback* callback = element->customLayoutCallback();
+
+    {
+        ScriptForbiddenScope::AllowUserAgentScript script;
+        callback->handleEvent(ensureLayoutContext());
+    }
+
+    // FIXME: Writing mode?
+
+    // ASSERT(pixelSnappedWidth() != -1);
+    // ASSERT(pixelSnappedHeight() != -1);
+
+    for (LayoutObject* child = this; child; child = child->nextInPreOrder(this))
+        child->clearNeedsLayout();
+}
+
 void RenderBlock::layout()
 {
     OverflowEventDispatcher dispatcher(this);
+
+    bool hasCustomLayout = !isAnonymous() && node()->isElementNode() && toElement(node())->customLayoutCallback();
+    if (hasCustomLayout) {
+        customLayout();
+        return;
+    }
 
     // Table cells call layoutBlock directly, so don't add any logic here.  Put code into
     // layoutBlock().

@@ -1,0 +1,16 @@
+[
+    GarbageCollected,
+    NoInterfaceObject
+] interface LayoutContext {
+    // FIXME: Class attributes?
+    readonly attribute Element element;
+
+    void setLayoutDimensions(float width, float height);
+
+    void setOffsetForChild(Node node, float x, float y);
+
+    [RaisesException] float availableWidth(Node node);
+    [RaisesException] float availableHeight(Node node);
+
+    [RaisesException] void constrainWidth(Node node, float width);
+};

@@ -35,6 +35,8 @@
 #include "wtf/ListHashSet.h"
 #include "wtf/OwnPtr.h"
 
+#include "core/dom/LayoutContext.h"
+
 namespace blink {
 
 class LineLayoutState;
@@ -327,6 +329,9 @@ private:
     virtual LayoutObjectChildList* virtualChildren() override final { return children(); }
     virtual const LayoutObjectChildList* virtualChildren() const override final { return children(); }
 
+    LayoutContext* ensureLayoutContext();
+    void customLayout();
+
     virtual const char* renderName() const override;
 
     virtual bool isRenderBlock() const override final { return true; }
@@ -473,6 +478,8 @@ protected:
     // FIXME: This is temporary as we move code that accesses block flow
     // member variables out of RenderBlock and into RenderBlockFlow.
     friend class RenderBlockFlow;
+
+    Persistent<LayoutContext> m_context;
 };
 
 DEFINE_LAYOUT_OBJECT_TYPE_CASTS(RenderBlock, isRenderBlock());

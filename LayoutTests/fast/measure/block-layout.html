@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<style>
+body {
+    font: 10px/1 Ahem;
+}
+
+customblock, customgrid {
+    display: block;
+}
+
+container {
+    display: block;
+    width: 100px;
+    height: auto;
+}
+</style>
+<container><customblock id="customblock"><div>Test Test</div><div>Fo oo oobar</div></customblock></container>
+<script>
+function blockLayout(ctx) {
+    var element = ctx.element;
+
+    // Let's get the min/max width.
+    var minWidth = 0;
+    var maxWidth = 0;
+    for (var child = element.firstChild; child; child = child.nextSibling) {
+        child.measure(); // FIXME: Forces a layout.
+        var size = child.measureInlineSize();
+        minWidth = Math.max(minWidth, size.minContentInlineSize);
+        maxWidth = Math.max(maxWidth, size.maxContentInlineSize);
+    }
+    // Shrink-wrap \o/.
+    var availableWidth = ctx.availableWidth(element.parentNode);
+    var width = Math.min(Math.max(minWidth, availableWidth), maxWidth);
+
+    // Let's constrain the elements now and get the height.
+    var height = 0;
+    for (var child = element.firstChild; child; child = child.nextSibling) {
+        ctx.constrainWidth(child, width);
+        var rect = child.measure();
+        ctx.setOffsetForChild(child, 0, height);
+        height += rect.height;
+    }
+    ctx.setLayoutDimensions(width, height);
+}
+
+customblock.registerCustomLayout(blockLayout);
+</script>
