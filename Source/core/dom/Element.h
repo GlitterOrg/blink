@@ -187,6 +187,8 @@ public:
     virtual int scrollWidth();
     virtual int scrollHeight();
 
+    ScriptPromise measure(ScriptState*, Element*);
+
     virtual void scrollBy(double x, double y);
     virtual void scrollBy(const ScrollToOptions&);
     virtual void scrollTo(double x, double y);
