@@ -471,6 +471,7 @@ Document::Document(const DocumentInit& initializer, DocumentClassFlags documentC
     , m_hasViewportUnits(false)
     , m_styleRecalcElementCounter(0)
     , m_parserSyncPolicy(AllowAsynchronousParsing)
+    , m_elementToMeasure(nullptr)
 {
     if (m_frame) {
         ASSERT(m_frame->page());
@@ -1526,6 +1527,8 @@ bool Document::needsRenderTreeUpdate() const
         return true;
     if (childNeedsStyleInvalidation())
         return true;
+    if (elementToMeasure())
+        return true;
     return false;
 }
 
@@ -1833,6 +1836,10 @@ void Document::updateStyle(StyleRecalcChange change)
             documentElement->recalcStyle(NoChange);
     }
 
+    if (Element* elementToMeasure = this->elementToMeasure()) {
+        elementToMeasure->recalcStyle(change);
+    }
+
     ensureStyleResolver().printStats();
 
     view()->recalcOverflowAfterStyleChange();
@@ -1878,11 +1885,12 @@ void Document::updateLayout()
     ScriptForbiddenScope forbidScript;
 
     RefPtrWillBeRawPtr<FrameView> frameView = view();
-    if (frameView && frameView->isInPerformLayout()) {
+    //if (frameView && frameView->isInPerformLayout()) {
         // View layout should not be re-entrant.
-        ASSERT_NOT_REACHED();
-        return;
-    }
+        // FIXME: We need a long term plan for that.
+        //ASSERT_NOT_REACHED();
+        //return;
+    //}
 
     if (HTMLFrameOwnerElement* owner = ownerElement())
         owner->document().updateLayout();

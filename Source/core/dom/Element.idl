@@ -135,6 +135,10 @@ interface Element : Node {
     [RuntimeEnabled=Touch] attribute EventHandler ontouchmove;
     [RuntimeEnabled=Touch] attribute EventHandler ontouchstart;
     attribute EventHandler onwheel;
+
+    // Experimental async measure.
+    // FIXME: Layout Param + tree position.
+    [CallWith=ScriptState] Promise measure(Element parent);
 };
 
 Element implements ParentNode;

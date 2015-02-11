@@ -739,6 +739,8 @@ private:
     void clearFlag(NodeFlags mask) { m_nodeFlags &= ~mask; }
 
 protected:
+    void setInDocument() { setFlag(InDocumentFlag); }
+
     enum ConstructionType {
         CreateOther = DefaultNodeFlags,
         CreateText = DefaultNodeFlags | IsTextFlag,

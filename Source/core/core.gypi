@@ -71,6 +71,7 @@
             'dom/Int32Array.idl',
             'dom/Int8Array.idl',
             'dom/Iterator.idl',
+            'dom/LayoutMeasure.idl',
             'dom/MessageChannel.idl',
             'dom/MessagePort.idl',
             'dom/MutationObserver.idl',

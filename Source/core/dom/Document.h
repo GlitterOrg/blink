@@ -1061,6 +1061,9 @@ public:
     virtual v8::Handle<v8::Object> wrap(v8::Handle<v8::Object> creationContext, v8::Isolate*) override;
     virtual v8::Handle<v8::Object> associateWithWrapper(v8::Isolate*, const WrapperTypeInfo*, v8::Handle<v8::Object> wrapper) override;
 
+    Element* elementToMeasure() const { return m_elementToMeasure; }
+    void setElementToMeasure(Element* element) { m_elementToMeasure = element; }
+
 protected:
     Document(const DocumentInit&, DocumentClassFlags = DefaultDocumentClass);
 
@@ -1392,6 +1395,8 @@ private:
     int m_styleRecalcElementCounter;
 
     ParserSynchronizationPolicy m_parserSyncPolicy;
+
+    Element* m_elementToMeasure;
 };
 
 inline bool Document::shouldOverrideLegacyDescription(ViewportDescription::Type origin)

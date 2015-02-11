@@ -30,6 +30,7 @@
 #include "bindings/core/v8/Dictionary.h"
 #include "bindings/core/v8/ExceptionMessages.h"
 #include "bindings/core/v8/ExceptionState.h"
+#include "bindings/core/v8/ScriptPromiseResolver.h"
 #include "bindings/core/v8/V8DOMWrapper.h"
 #include "bindings/core/v8/V8PerContextData.h"
 #include "core/CSSValueKeywords.h"
@@ -58,6 +59,7 @@
 #include "core/dom/ExceptionCode.h"
 #include "core/dom/FirstLetterPseudoElement.h"
 #include "core/dom/Fullscreen.h"
+#include "core/dom/LayoutMeasure.h"
 #include "core/dom/MutationObserverInterestGroup.h"
 #include "core/dom/MutationRecord.h"
 #include "core/dom/NamedNodeMap.h"
@@ -721,6 +723,48 @@ int Element::scrollHeight()
     if (RenderBox* rend = renderBox())
         return adjustLayoutUnitForAbsoluteZoom(rend->scrollHeight(), *rend).toDouble();
     return 0;
+}
+
+ScriptPromise Element::measure(ScriptState* scriptState, Element* parent)
+{
+    RefPtrWillBeRawPtr<ScriptPromiseResolver> resolver = ScriptPromiseResolver::create(scriptState);
+    ScriptPromise promise = resolver->promise();
+
+    if (!parent) {
+        // measure(document.body) when document.body is null / undefined.
+        resolver->reject(DOMException::create(NotSupportedError, "|parent| should be non-NULL."));
+        return promise;
+    }
+
+    // If I want to reject it -> resolver->reject(DOMException::create(SyntaxError, "Test"));
+
+    // Make sure the document is fully laid out?
+    // FIXME: We could do it with dirty style but that's probably crazy.
+    document().updateLayoutIgnorePendingStylesheets();
+
+    // Super dirty attaching.
+    setParentOrShadowHostNode(parent);
+    document().setElementToMeasure(this);
+    setInDocument();
+
+    // FIXME: We should have that pour etre sur
+    // RenderObject::SetLayoutNeededForbiddenScope parentDisabler(*parent->renderer());
+    // Force style recalc on |this|.
+    document().updateLayoutIgnorePendingStylesheets();
+
+    setParentOrShadowHostNode(nullptr);
+    document().setElementToMeasure(nullptr);
+    // setInDocument(false);
+    // FIXME: We leave the renderer in the tree!!!!!!!
+
+    // Mhh, we are keeping the renderer.
+    if (!renderBox()) {
+        resolver->reject(DOMException::create(NotSupportedError, "Not a box."));
+        return promise;
+    }
+
+    resolver->resolve(LayoutMeasure::create(renderBox()->size().width().toFloat(), renderBox()->size().height().toFloat()));
+    return promise;
 }
 
 void Element::scrollBy(double x, double y)
