@@ -1,0 +1,3 @@
+callback interface LayoutCallback {
+    void handleEvent(LayoutContext context);
+};

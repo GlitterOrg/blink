@@ -37,6 +37,9 @@
 #include "platform/heap/Handle.h"
 #include "public/platform/WebFocusType.h"
 
+// FIXME: Why is V8Element complaining?
+#include "core/dom/ContentInlineSizeInfo.h"
+
 namespace blink {
 
 class ActiveAnimations;
@@ -57,6 +60,7 @@ class Image;
 class InputMethodContext;
 class IntSize;
 class Locale;
+class LayoutCallback;
 class MutableStylePropertySet;
 class PropertySetCSSStyleDeclaration;
 class PseudoElement;
@@ -469,6 +473,13 @@ public:
     void setIsInTopLayer(bool);
 
     void requestPointerLock();
+
+    PassRefPtrWillBeRawPtr<ClientRect> measure(Element* parent, ExceptionState&);
+    PassRefPtrWillBeRawPtr<ClientRect> measure(ExceptionState&);
+    void registerCustomLayout(LayoutCallback* callback);
+    LayoutCallback* customLayoutCallback() const;
+
+    PassRefPtrWillBeRawPtr<ContentInlineSizeInfo> measureInlineSize();
 
     bool isSpellCheckingEnabled() const;
 

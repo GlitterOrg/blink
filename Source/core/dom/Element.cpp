@@ -2815,6 +2815,93 @@ void Element::requestPointerLock()
         document().page()->pointerLockController().requestPointerLock(this);
 }
 
+PassRefPtrWillBeRawPtr<ClientRect> Element::measure(ExceptionState& state)
+{
+    if (!parentNode()) {
+        state.throwDOMException(NotSupportedError, "if parent is omitted, we should be in the tree.");
+        return ClientRect::create();
+    }
+
+    renderer()->setNeedsLayout(MarkOnlyThis);
+    renderer()->layout();
+
+    if (!renderer()->isBoxModelObject())
+        return ClientRect::create();
+
+    return ClientRect::create(toRenderBoxModelObject(renderer())->borderBoundingBox());
+}
+
+PassRefPtrWillBeRawPtr<ClientRect> Element::measure(Element* parent, ExceptionState& state)
+{
+    if (!parent) {
+        // measure(document.body) when document.body is null / undefined.
+        state.throwDOMException(NotSupportedError, "|parent| should be non-NULL.");
+        return ClientRect::create();
+    }
+
+    // FIXME: Those conditions may be artificial, especially the |parent| check (what if 2 levels deep).
+    if (parentNode()) {
+        state.throwDOMException(NotSupportedError, "We don't support Element is in the tree.");
+        return ClientRect::create();
+    }
+
+    if (!parent->parentNode()) {
+        state.throwDOMException(NotSupportedError, "|parent| should be in the tree");
+        return ClientRect::create();
+    }
+    
+    if (document() != parent->document()) {
+        state.throwDOMException(NotSupportedError, "No cross origin measuring!!!");
+        return ClientRect::create();
+    }
+
+    // Make sure the document is fully laid out?
+    // FIXME: We could do it with dirty style but that's probably crazy.
+    document().updateLayoutIgnorePendingStylesheets();
+
+    // Super dirty attaching.
+    setParentOrShadowHostNode(parent);
+    document().setElementToMeasure(this);
+    setInDocument();
+
+    // FIXME: We should have that pour etre sur
+    // RenderObject::SetLayoutNeededForbiddenScope parentDisabler(*parent->renderer());
+    // Force style recalc on |this|.
+    document().updateLayoutIgnorePendingStylesheets();
+
+    setParentOrShadowHostNode(nullptr);
+    document().setElementToMeasure(nullptr);
+    // setInDocument(false);
+    // FIXME: We leave the renderer in the tree!!!!!!!
+
+    // Mhh, we are keeping the renderer.
+    if (!renderBox())
+        return ClientRect::create();
+    return ClientRect::create(renderBox()->frameRect());
+}
+
+void Element::registerCustomLayout(LayoutCallback* callback)
+{
+    ensureElementRareData().setLayoutCallback(callback);
+}
+
+LayoutCallback* Element::customLayoutCallback() const
+{
+    if (!hasRareData())
+        return 0;
+
+    return elementRareData()->layoutCallback();
+}
+
+PassRefPtrWillBeRawPtr<ContentInlineSizeInfo> Element::measureInlineSize()
+{
+    // No guarantee on staleness.
+    // No renderer() check either.
+    double min = renderer()->minPreferredLogicalWidth().toDouble();
+    double max = renderer()->maxPreferredLogicalWidth().toDouble();
+    return ContentInlineSizeInfo::create(min, max);
+}
+
 SpellcheckAttributeState Element::spellcheckAttributeState() const
 {
     const AtomicString& value = fastGetAttribute(spellcheckAttr);
@@ -3372,6 +3459,7 @@ void Element::trace(Visitor* visitor)
     if (hasRareData())
         visitor->trace(elementRareData());
     visitor->trace(m_elementData);
+    visitor->trace(m_callback);
 #endif
     ContainerNode::trace(visitor);
 }

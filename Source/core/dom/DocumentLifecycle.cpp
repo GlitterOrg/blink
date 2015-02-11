@@ -125,6 +125,9 @@ bool DocumentLifecycle::canAdvanceTo(State state) const
             return true;
         if (state == StyleClean)
             return true;
+        // FIXME: AfterPerformLayout is for my hacky measure API.
+        if (state == AfterPerformLayout)
+            return true;
         return false;
     }
     if (m_state == CompositingClean) {

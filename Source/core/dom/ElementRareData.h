@@ -25,6 +25,7 @@
 #include "core/animation/ActiveAnimations.h"
 #include "core/dom/Attr.h"
 #include "core/dom/DatasetDOMStringMap.h"
+#include "core/dom/LayoutCallback.h"
 #include "core/dom/NamedNodeMap.h"
 #include "core/dom/NodeRareData.h"
 #include "core/dom/PseudoElement.h"
@@ -108,6 +109,9 @@ public:
         m_activeAnimations = activeAnimations;
     }
 
+    LayoutCallback* layoutCallback() const { return m_callback; }
+    void setLayoutCallback(LayoutCallback* callback) { m_callback = callback; }
+
     bool hasInputMethodContext() const { return m_inputMethodContext; }
     InputMethodContext& ensureInputMethodContext(HTMLElement* element)
     {
@@ -142,6 +146,7 @@ private:
     OwnPtrWillBeMember<InputMethodContext> m_inputMethodContext;
     OwnPtrWillBeMember<ActiveAnimations> m_activeAnimations;
     OwnPtrWillBeMember<InlineCSSStyleDeclaration> m_cssomWrapper;
+    Persistent<LayoutCallback> m_callback;
 
     RefPtr<LayoutStyle> m_computedStyle;
     RefPtrWillBeMember<CustomElementDefinition> m_customElementDefinition;
