@@ -24,6 +24,7 @@
 #define HTMLElement_h
 
 #include "core/dom/Element.h"
+#include "core/customlayout/CustomLayoutGlobalScope.h"
 
 namespace blink {
 
@@ -137,6 +138,8 @@ private:
     TranslateAttributeMode translateAttributeMode() const;
 
     void handleKeypressEvent(KeyboardEvent*);
+
+    RefPtrWillBeRawPtr<CustomLayoutGlobalScope> m_layoutScope;
 };
 
 DEFINE_ELEMENT_TYPE_CASTS(HTMLElement, isHTMLElement());

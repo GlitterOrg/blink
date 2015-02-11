@@ -348,6 +348,9 @@ void HTMLElement::parseAttribute(const QualifiedName& name, const AtomicString& 
 
     if (name == dirAttr) {
         dirAttributeChanged(value);
+    } if (name == customlayoutAttr) {
+        m_layoutScope = CustomLayoutGlobalScope::create(&document());
+        m_layoutScope->loadAndRun(&document(), document().completeURL(value));
     } else {
         const AtomicString& eventName = eventNameForAttributeName(name);
         if (!eventName.isNull())

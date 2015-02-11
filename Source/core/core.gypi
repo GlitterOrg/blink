@@ -39,6 +39,7 @@
             'css/StyleSheet.idl',
             'css/StyleSheetList.idl',
             'css/WebKitCSSMatrix.idl',
+            'customlayout/CustomLayoutGlobalScope.idl',
             'dom/ArrayBuffer.idl',
             'dom/ArrayBufferView.idl',
             'dom/Attr.idl',
@@ -2084,6 +2085,8 @@
             'xmlhttprequest/XMLHttpRequestUpload.h',
         ],
         'webcore_dom_files': [
+            'customlayout/CustomLayoutGlobalScope.cpp',
+            'customlayout/CustomLayoutGlobalScope.h',
             'dom/AXObjectCache.cpp',
             'dom/AXObjectCache.h',
             'dom/ActiveDOMObject.cpp',
