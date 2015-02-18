@@ -116,6 +116,15 @@ v8::Isolate* V8PerIsolateData::initialize()
     return isolate;
 }
 
+v8::Isolate* V8PerIsolateData::initializeSameThread()
+{
+    V8PerIsolateData* data = new V8PerIsolateData();
+    v8::Isolate* isolate = data->isolate();
+    isolate->SetAutorunMicrotasks(false);
+    isolate->SetData(gin::kEmbedderBlink, data);
+    return isolate;
+}
+
 v8::Persistent<v8::Value>& V8PerIsolateData::ensureLiveRoot()
 {
     if (m_liveRoot.isEmpty())

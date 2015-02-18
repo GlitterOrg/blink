@@ -29,6 +29,7 @@
             'V8InjectedScriptHostCustom.cpp',
             'V8InjectedScriptManager.cpp',
             'V8JavaScriptCallFrameCustom.cpp',
+            'V8LayoutGlobalScopeCustom.cpp',
             'V8LocationCustom.cpp',
             'V8MessageChannelCustom.cpp',
             'V8MessageEventCustom.cpp',

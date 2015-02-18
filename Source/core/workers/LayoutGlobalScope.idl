@@ -1,0 +1,8 @@
+[
+    Custom=ToV8,
+] interface LayoutGlobalScope : EventTarget {
+    [Replaceable] readonly attribute LayoutGlobalScope self;
+    readonly attribute DOMString tmp;
+    attribute Function fn;
+};
+LayoutGlobalScope implements WindowBase64;

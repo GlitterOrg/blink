@@ -59,6 +59,7 @@ public:
     virtual void trace(Visitor*) override;
 
     virtual bool isDocument() const { return false; }
+    virtual bool isLayoutGlobalScope() const { return false; }
     virtual bool isWorkerGlobalScope() const { return false; }
     virtual bool isDedicatedWorkerGlobalScope() const { return false; }
     virtual bool isSharedWorkerGlobalScope() const { return false; }

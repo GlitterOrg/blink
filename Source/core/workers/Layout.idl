@@ -1,0 +1,11 @@
+[
+    ActiveDOMObject,
+    Constructor(DOMString scriptUrl),
+    ConstructorCallWith=ExecutionContext,
+    RaisesException=Constructor,
+] interface Layout : EventTarget {
+    readonly attribute DOMString type;
+    double invoke(double a, double b);
+
+};
+Layout implements AbstractWorker;

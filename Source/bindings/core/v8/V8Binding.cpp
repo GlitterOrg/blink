@@ -40,9 +40,11 @@
 #include "bindings/core/v8/V8NodeFilterCondition.h"
 #include "bindings/core/v8/V8ObjectConstructor.h"
 #include "bindings/core/v8/V8Window.h"
+//#include "bindings/core/v8/V8LayoutGlobalScope.h"
 #include "bindings/core/v8/V8WorkerGlobalScope.h"
 #include "bindings/core/v8/V8XPathNSResolver.h"
 #include "bindings/core/v8/WindowProxy.h"
+#include "bindings/core/v8/LayoutScriptController.h"
 #include "bindings/core/v8/WorkerScriptController.h"
 #include "bindings/core/v8/custom/V8CustomXPathNSResolver.h"
 #include "core/dom/Document.h"
@@ -56,6 +58,7 @@
 #include "core/inspector/InspectorTraceEvents.h"
 #include "core/loader/FrameLoader.h"
 #include "core/loader/FrameLoaderClient.h"
+#include "core/workers/LayoutGlobalScope.h"
 #include "core/workers/WorkerGlobalScope.h"
 #include "core/xml/XPathNSResolver.h"
 #include "platform/EventTracer.h"
@@ -847,6 +850,9 @@ v8::Local<v8::Context> toV8Context(ExecutionContext* context, DOMWrapperWorld& w
             return frame->script().windowProxy(world)->context();
     } else if (context->isWorkerGlobalScope()) {
         if (WorkerScriptController* script = toWorkerGlobalScope(context)->script())
+            return script->context();
+    } else if (context->isLayoutGlobalScope()) {
+        if (LayoutScriptController* script = toLayoutGlobalScope(context)->script())
             return script->context();
     }
     return v8::Local<v8::Context>();

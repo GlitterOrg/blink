@@ -53,6 +53,7 @@ public:
     };
 
     static v8::Isolate* initialize();
+    static v8::Isolate* initializeSameThread();
     static V8PerIsolateData* from(v8::Isolate* isolate)
     {
         ASSERT(isolate);

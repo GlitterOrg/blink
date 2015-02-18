@@ -71,7 +71,7 @@ v8::Local<v8::Value> V8ErrorHandler::callListenerFunction(ScriptState* scriptSta
         tryCatch.SetVerbose(true);
         if (scriptState->executionContext()->isWorkerGlobalScope())
             returnValue = V8ScriptRunner::callFunction(callFunction, scriptState->executionContext(), thisValue, WTF_ARRAY_LENGTH(parameters), parameters, isolate());
-        else
+        else // XXX need to add LayoutGlobalScope here.
             returnValue = ScriptController::callFunction(scriptState->executionContext(), callFunction, thisValue, WTF_ARRAY_LENGTH(parameters), parameters, isolate());
     }
     return returnValue;

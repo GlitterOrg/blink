@@ -18,6 +18,8 @@ core/page/EventSource
 core/timing/Performance
 core/frame/Window ImplementedAs=LocalDOMWindow
 core/workers/DedicatedWorkerGlobalScope
+core/workers/Layout
+core/workers/LayoutGlobalScope
 core/workers/SharedWorker
 core/workers/SharedWorkerGlobalScope
 core/workers/Worker

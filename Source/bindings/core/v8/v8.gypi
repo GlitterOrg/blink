@@ -36,6 +36,8 @@
             'ExceptionState.h',
             'ExceptionStatePlaceholder.cpp',
             'ExceptionStatePlaceholder.h',
+            'LayoutScriptController.cpp',
+            'LayoutScriptController.h',
             'ModuleProxy.cpp',
             'ModuleProxy.h',
             'NPV8Object.cpp',

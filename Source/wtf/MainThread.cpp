@@ -38,6 +38,7 @@
 
 namespace WTF {
 
+static bool overrideMain = false;
 static ThreadIdentifier mainThreadIdentifier;
 static void (*callOnMainThreadFunction)(MainThreadFunction, void*);
 
@@ -73,7 +74,12 @@ void callOnMainThread(PassOwnPtr<Function<void()>> function)
 
 bool isMainThread()
 {
-    return currentThread() == mainThreadIdentifier;
+    return currentThread() == mainThreadIdentifier && !overrideMain;
+}
+
+void overrideMainThread(bool over)
+{
+    overrideMain = over;
 }
 
 } // namespace WTF

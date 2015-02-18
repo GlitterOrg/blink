@@ -32,7 +32,7 @@
 
 namespace blink {
 
-WTFLogChannel LogNotYetImplemented =  { WTFLogChannelOff };
+WTFLogChannel LogNotYetImplemented =  { WTFLogChannelOn };
 
 WTFLogChannel LogFrames =             { WTFLogChannelOff };
 WTFLogChannel LogLoading =            { WTFLogChannelOff };

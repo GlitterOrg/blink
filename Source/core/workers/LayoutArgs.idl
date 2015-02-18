@@ -1,0 +1,4 @@
+interface LayoutArgs {
+    readonly attribute double arg1;
+    readonly attribute double arg2;
+};

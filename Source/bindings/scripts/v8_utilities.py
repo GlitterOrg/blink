@@ -252,6 +252,7 @@ EXPOSED_EXECUTION_CONTEXT_METHOD = {
     'ServiceWorker': 'isServiceWorkerGlobalScope',
     'SharedWorker': 'isSharedWorkerGlobalScope',
     'Window': 'isDocument',
+    'Layout': 'isLayoutGlobalScope',
     'Worker': 'isWorkerGlobalScope',
 }
 

@@ -17,6 +17,7 @@ namespace blink {
 
 class DOMWindow;
 class EventTarget;
+class LayoutGlobalScope;
 class WorkerGlobalScope;
 
 // ScriptWrappable
@@ -47,6 +48,7 @@ inline v8::Handle<v8::Value> toV8(Node* impl, v8::Handle<v8::Object> creationCon
 
 v8::Handle<v8::Value> toV8(DOMWindow*, v8::Handle<v8::Object> creationContext, v8::Isolate*);
 v8::Handle<v8::Value> toV8(EventTarget*, v8::Handle<v8::Object> creationContext, v8::Isolate*);
+v8::Handle<v8::Value> toV8(LayoutGlobalScope*, v8::Handle<v8::Object> creationContext, v8::Isolate*);
 v8::Handle<v8::Value> toV8(WorkerGlobalScope*, v8::Handle<v8::Object> creationContext, v8::Isolate*);
 
 // PassRefPtr, RawPtr and RefPtr

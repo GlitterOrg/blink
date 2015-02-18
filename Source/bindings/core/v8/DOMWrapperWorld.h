@@ -51,6 +51,7 @@ enum WorldIdConstants {
     PrivateScriptIsolatedWorldId,
     IsolatedWorldIdLimit,
     WorkerWorldId,
+    LayoutWorldId,
     TestingWorldId,
 };
 
