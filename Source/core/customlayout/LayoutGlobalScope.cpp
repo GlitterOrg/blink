@@ -1,5 +1,5 @@
 #include "config.h"
-#include "core/workers/LayoutGlobalScope.h"
+#include "core/customlayout/LayoutGlobalScope.h"
 
 #include "bindings/core/v8/LayoutScriptController.h"
 #include "core/dom/MainThreadTaskRunner.h"

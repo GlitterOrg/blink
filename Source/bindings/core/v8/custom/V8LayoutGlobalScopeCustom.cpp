@@ -5,11 +5,11 @@
 #include "bindings/core/v8/ScheduledAction.h"
 #include "bindings/core/v8/V8Binding.h"
 #include "bindings/core/v8/LayoutScriptController.h"
+#include "core/customlayout/LayoutGlobalScope.h"
 #include "core/frame/DOMTimer.h"
 #include "core/frame/DOMWindowTimers.h"
 #include "core/frame/csp/ContentSecurityPolicy.h"
 #include "core/inspector/ScriptCallStack.h"
-#include "core/workers/LayoutGlobalScope.h"
 #include "wtf/OwnPtr.h"
 
 namespace blink {

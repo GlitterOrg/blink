@@ -47,11 +47,8 @@ WTF_EXPORT void callOnMainThread(PassOwnPtr<Function<void()>>);
 
 WTF_EXPORT bool isMainThread();
 
-WTF_EXPORT void overrideMainThread(bool);
-
 } // namespace WTF
 
 using WTF::callOnMainThread;
 using WTF::isMainThread;
-using WTF::overrideMainThread;
 #endif // MainThread_h

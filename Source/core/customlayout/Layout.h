@@ -1,8 +1,8 @@
 #ifndef Layout_h
 #define Layout_h
 
+#include "core/customlayout/LayoutGlobalScope.h"
 #include "core/workers/AbstractWorker.h"
-#include "core/workers/LayoutGlobalScope.h"
 #include "core/workers/WorkerScriptLoaderClient.h"
 #include "wtf/RefPtr.h"
 #include <v8.h>

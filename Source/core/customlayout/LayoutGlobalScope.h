@@ -26,14 +26,10 @@ class LayoutGlobalScope : public EventTargetWithInlineData, public RefCountedWil
     REFCOUNTED_EVENT_TARGET(LayoutGlobalScope);
     WILL_BE_USING_GARBAGE_COLLECTED_MIXIN(LayoutGlobalScope);
 public:
-    // HACK
-    // using RefCounted<LayoutGlobalScope>::ref;
-    // using RefCounted<LayoutGlobalScope>::deref;
-
     static PassRefPtrWillBeRawPtr<LayoutGlobalScope> create(const KURL&, const String&);
     virtual ~LayoutGlobalScope();
 
-    // LayoutGlobalScope
+    // LayoutGlobalScope.idl
     LayoutGlobalScope* self() { return this; }
     const AtomicString& tmp() const;
 
@@ -49,7 +45,7 @@ public:
     virtual ExecutionContext* executionContext() const override final;
     virtual void postTask(PassOwnPtr<ExecutionContextTask> task) override final;
 
-    // Hack. Just WTF_LOG these.
+    // Hack. Just WTF_LOG-ing these.
     virtual void reportBlockedScriptExecutionToInspector(const String&) override final;
     virtual void addConsoleMessage(PassRefPtrWillBeRawPtr<ConsoleMessage>) override final;
     virtual void logExceptionToConsole(const String& errorMessage, int scriptId, const String& sourceURL, int lineNumber, int columnNumber, PassRefPtrWillBeRawPtr<ScriptCallStack>) override final;
@@ -61,7 +57,6 @@ public:
     virtual SecurityContext& securityContext() override final { return *this; }
 
     virtual bool isContextThread() const override final;
-    // TODO virtual bool isJSExecutionForbidden() const override final;
 
     virtual double timerAlignmentInterval() const override final;
     virtual DOMTimerCoordinator* timers() override final;
@@ -95,7 +90,6 @@ private:
 
     LayoutGlobalScope(const KURL&, const String&);
 };
-
 DEFINE_TYPE_CASTS(LayoutGlobalScope, ExecutionContext, context, context->isLayoutGlobalScope(), context.isLayoutGlobalScope());
 
 } // namespace blink

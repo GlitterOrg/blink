@@ -7,10 +7,10 @@
 #include "bindings/core/v8/V8ObjectConstructor.h"
 #include "bindings/core/v8/V8ScriptRunner.h"
 #include "bindings/core/v8/WrapperTypeInfo.h"
+#include "core/customlayout/LayoutGlobalScope.h"
 #include "core/events/ErrorEvent.h"
 #include "core/frame/DOMTimer.h"
 #include "core/inspector/ScriptCallStack.h"
-#include "core/workers/LayoutGlobalScope.h"
 #include "public/platform/Platform.h"
 #include "platform/Logging.h"
 #include <v8.h>
@@ -21,7 +21,7 @@ LayoutScriptController::LayoutScriptController(LayoutGlobalScope& layoutGlobalSc
     : m_isolate(0)
     , m_layoutGlobalScope(layoutGlobalScope)
 {
-    m_isolate = v8::Isolate::GetCurrent(); // vas V8PerIsolateData::initialize();
+    m_isolate = v8::Isolate::GetCurrent();
     m_world = DOMWrapperWorld::create(m_isolate, LayoutWorldId);
 }
 
