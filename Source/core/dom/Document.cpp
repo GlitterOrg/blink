@@ -1875,7 +1875,7 @@ void Document::updateLayout()
 {
     ASSERT(isMainThread());
 
-    ScriptForbiddenScope forbidScript;
+    // ScriptForbiddenScope forbidScript; forbidding script is BORING.
 
     RefPtrWillBeRawPtr<FrameView> frameView = view();
     if (frameView && frameView->isInPerformLayout()) {

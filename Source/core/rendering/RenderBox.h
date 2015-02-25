@@ -23,6 +23,7 @@
 #ifndef RenderBox_h
 #define RenderBox_h
 
+#include "core/customlayout/LayoutNode.h"
 #include "core/layout/shapes/ShapeOutsideInfo.h"
 #include "core/rendering/RenderBoxModelObject.h"
 #include "core/rendering/RenderOverflow.h"
@@ -56,6 +57,7 @@ public:
         , m_overrideLogicalContentHeight(-1)
         , m_overrideLogicalContentWidth(-1)
         , m_previousBorderBoxSize(-1, -1)
+        , m_layoutNode(nullptr)
     {
     }
 
@@ -70,6 +72,9 @@ public:
 
     // Set by RenderBox::updatePreviousBorderBoxSizeIfNeeded().
     LayoutSize m_previousBorderBoxSize;
+
+    // For Custom Layout.
+    RefPtr<LayoutNode> m_layoutNode;
 };
 
 class RenderBox : public RenderBoxModelObject {
@@ -410,6 +415,11 @@ public:
     void setSpannerPlaceholder(RenderMultiColumnSpannerPlaceholder&);
     void clearSpannerPlaceholder();
     virtual RenderMultiColumnSpannerPlaceholder* spannerPlaceholder() const final { return m_rareData ? m_rareData->m_spannerPlaceholder : 0; }
+
+    // LayoutNode
+    bool hasScriptLayoutNode() const { return m_rareData && m_rareData->m_layoutNode; }
+    LayoutNode* scriptLayoutNode() const { return m_rareData ? m_rareData->m_layoutNode.get() : nullptr; }
+    void setScriptLayoutNode(PassRefPtrWillBeRawPtr<LayoutNode> layoutNode) { ensureRareData().m_layoutNode = layoutNode; }
 
     virtual LayoutRect clippedOverflowRectForPaintInvalidation(const LayoutLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const override;
     virtual void mapRectToPaintInvalidationBacking(const LayoutLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const override;

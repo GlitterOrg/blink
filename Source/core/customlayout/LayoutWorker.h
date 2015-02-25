@@ -1,5 +1,5 @@
-#ifndef Layout_h
-#define Layout_h
+#ifndef LayoutWorker_h
+#define LayoutWorker_h
 
 #include "core/customlayout/LayoutGlobalScope.h"
 #include "core/workers/AbstractWorker.h"
@@ -11,23 +11,28 @@ namespace blink {
 
 class ExceptionState;
 class ExecutionContext;
+class LayoutUnit;
+class RenderBox;
 class WorkerScriptLoader;
 
-class Layout final : public AbstractWorker, private WorkerScriptLoaderClient {
+class LayoutWorker final : public AbstractWorker, private WorkerScriptLoaderClient {
     DEFINE_WRAPPERTYPEINFO();
 public:
-    static PassRefPtrWillBeRawPtr<Layout> create(ExecutionContext*, const String& url, ExceptionState&);
-    virtual ~Layout();
+    static PassRefPtrWillBeRawPtr<LayoutWorker> create(ExecutionContext*, const String& url, ExceptionState&);
+    virtual ~LayoutWorker();
 
     const AtomicString& type() const;
     double invoke(double, double) const;
+
+    void computeIntrinsicLogicalWidths(LayoutUnit&, LayoutUnit&, Vector<RenderBox*>&);
+    void calculateHeightAndPositionChildren(LayoutUnit&, Vector<RenderBox*>&);
 
     virtual const AtomicString& interfaceName() const override;
 
     virtual void trace(Visitor*) override;
 
 private:
-    explicit Layout(ExecutionContext*);
+    explicit LayoutWorker(ExecutionContext*);
 
     // WorkerScriptLoaderClient callbacks
     virtual void didReceiveResponse(unsigned long identifier, const ResourceResponse&) override;
@@ -35,8 +40,7 @@ private:
 
     RefPtr<WorkerScriptLoader> m_scriptLoader;
     RefPtrWillBePersistent<LayoutGlobalScope> m_layoutGlobalScope;
-    //v8::Isolate* m_isolate;
 };
 } // namespace blink
 
-#endif // Layout_h
+#endif // LayoutWorker_h

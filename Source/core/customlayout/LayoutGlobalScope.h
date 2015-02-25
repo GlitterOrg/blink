@@ -31,10 +31,18 @@ public:
 
     // LayoutGlobalScope.idl
     LayoutGlobalScope* self() { return this; }
-    const AtomicString& tmp() const;
 
     ScriptValue fn() const { return m_fnValue; }
-    void setFn(ScriptValue& fnValue) { m_fnValue = fnValue; }
+    void setFn(ScriptValue& value) { m_fnValue = value; }
+
+    ScriptValue calculateMinContentInlineSize() const { return m_calculateMinContentInlineSize; }
+    void setCalculateMinContentInlineSize(ScriptValue& value) { m_calculateMinContentInlineSize = value; }
+
+    ScriptValue calculateMaxContentInlineSize() const { return m_calculateMaxContentInlineSize; }
+    void setCalculateMaxContentInlineSize(ScriptValue& value) { m_calculateMaxContentInlineSize = value; }
+
+    ScriptValue calculateHeightAndPositionChildren() const { return m_calculateHeightAndPositionChildren; }
+    void setCalculateHeightAndPositionChildren(ScriptValue& value) { m_calculateHeightAndPositionChildren = value; }
 
     // EventTarget
     virtual const AtomicString& interfaceName() const override;
@@ -81,6 +89,9 @@ private:
     DOMTimerCoordinator m_timers;
     OwnPtr<MainThreadTaskRunner> m_taskRunner;
     ScriptValue m_fnValue;
+    ScriptValue m_calculateMinContentInlineSize;
+    ScriptValue m_calculateMaxContentInlineSize;
+    ScriptValue m_calculateHeightAndPositionChildren;
 
     // ExecutionContext
     virtual const KURL& virtualURL() const override final;

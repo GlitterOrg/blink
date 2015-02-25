@@ -2,7 +2,9 @@
     Custom=ToV8,
 ] interface LayoutGlobalScope : EventTarget {
     [Replaceable] readonly attribute LayoutGlobalScope self;
-    readonly attribute DOMString tmp;
     attribute Function fn;
+    attribute Function calculateMinContentInlineSize;
+    attribute Function calculateMaxContentInlineSize;
+    attribute Function calculateHeightAndPositionChildren;
 };
 LayoutGlobalScope implements WindowBase64;

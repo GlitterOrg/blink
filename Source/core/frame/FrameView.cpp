@@ -841,7 +841,7 @@ void FrameView::performLayout(LayoutObject* rootForThisLayout, bool inSubtreeLay
     TRACE_EVENT0("blink,benchmark", "FrameView::performLayout");
     double start = WTF::currentTimeMS();
 
-    ScriptForbiddenScope forbidScript;
+    // ScriptForbiddenScope forbidScript; forbidding script is BORING.
 
     ASSERT(!isInPerformLayout());
     lifecycle().advanceTo(DocumentLifecycle::InPerformLayout);
@@ -898,7 +898,7 @@ void FrameView::layout(bool allowSubtree)
     ASSERT(m_frame->view() == this);
     ASSERT(m_frame->page());
 
-    ScriptForbiddenScope forbidScript;
+    // ScriptForbiddenScope forbidScript; forbidding script is BORING.
 
     if (isInPerformLayout() || !m_frame->document()->isActive())
         return;

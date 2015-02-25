@@ -44,12 +44,6 @@ ExecutionContext* LayoutGlobalScope::executionContext() const
     return const_cast<LayoutGlobalScope*>(this);
 }
 
-const AtomicString& LayoutGlobalScope::tmp() const
-{
-    DEFINE_STATIC_LOCAL(AtomicString, tmp, ("tmp!!", AtomicString::ConstructFromLiteral));
-    return tmp;
-}
-
 const AtomicString& LayoutGlobalScope::interfaceName() const
 {
     return EventTargetNames::LayoutGlobalScope;

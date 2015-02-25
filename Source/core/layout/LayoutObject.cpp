@@ -65,6 +65,7 @@
 #include "core/page/EventHandler.h"
 #include "core/page/Page.h"
 #include "core/paint/ObjectPainter.h"
+#include "core/rendering/RenderCustomBox.h"
 #include "core/rendering/RenderDeprecatedFlexibleBox.h"
 #include "core/rendering/RenderFlexibleBox.h"
 #include "core/rendering/RenderFlowThread.h"
@@ -86,6 +87,7 @@
 #include "platform/geometry/TransformState.h"
 #include "platform/graphics/GraphicsContext.h"
 #include "platform/graphics/paint/DisplayItemList.h"
+#include "platform/Logging.h"
 #include "wtf/RefCountedLeakCounter.h"
 #include "wtf/text/StringBuilder.h"
 #include "wtf/text/WTFString.h"
@@ -173,6 +175,10 @@ LayoutObject* LayoutObject::createObject(Element* element, const LayoutStyle& st
         image->setStyleInternal(nullptr);
         return image;
     }
+
+    // Custom layout!
+    if (element->hasLayout())
+        return new RenderCustomBox(element);
 
     switch (style.display()) {
     case NONE:

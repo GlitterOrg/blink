@@ -954,6 +954,8 @@ public:
         return isFlexibleBox() || isDeprecatedFlexibleBox();
     }
 
+    virtual bool isCustomBox() const { return false; }
+
     virtual bool isCombineText() const { return false; }
 
     virtual int caretMinOffset() const;

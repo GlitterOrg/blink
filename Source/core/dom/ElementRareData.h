@@ -23,6 +23,7 @@
 #define ElementRareData_h
 
 #include "core/animation/ActiveAnimations.h"
+#include "core/customlayout/LayoutWorker.h"
 #include "core/dom/Attr.h"
 #include "core/dom/DatasetDOMStringMap.h"
 #include "core/dom/NamedNodeMap.h"
@@ -122,6 +123,9 @@ public:
     void setCustomElementDefinition(PassRefPtrWillBeRawPtr<CustomElementDefinition> definition) { m_customElementDefinition = definition; }
     CustomElementDefinition* customElementDefinition() const { return m_customElementDefinition.get(); }
 
+    void setLayout(PassRefPtrWillBeRawPtr<LayoutWorker> layout) { m_layout = layout; }
+    LayoutWorker* layout() const { return m_layout.get(); }
+
     WillBeHeapVector<RefPtrWillBeMember<Attr> >& ensureAttrNodeList();
     WillBeHeapVector<RefPtrWillBeMember<Attr> >* attrNodeList() { return m_attrNodeList.get(); }
     void removeAttrNodeList() { m_attrNodeList.clear(); }
@@ -145,6 +149,7 @@ private:
 
     RefPtr<LayoutStyle> m_computedStyle;
     RefPtrWillBeMember<CustomElementDefinition> m_customElementDefinition;
+    RefPtrWillBeMember<LayoutWorker> m_layout;
 
     RefPtrWillBeMember<PseudoElement> m_generatedBefore;
     RefPtrWillBeMember<PseudoElement> m_generatedAfter;

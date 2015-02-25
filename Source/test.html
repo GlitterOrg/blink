@@ -1,0 +1,14 @@
+<html>
+  <body>
+    <div id="foo">
+      <div>Foo foo foo.</div>
+      <div>Blah blah blah.</div>
+      <div>Quix quix quix.</div>
+    </div>
+    <script>
+      var layout = new LayoutWorker('mylayout.js');
+      var el = document.getElementById('foo');
+      el.layout = layout;
+    </script>
+  </body>
+</html>

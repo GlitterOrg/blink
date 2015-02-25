@@ -56,6 +56,7 @@ class ExceptionState;
 class Image;
 class InputMethodContext;
 class IntSize;
+class LayoutWorker;
 class Locale;
 class MutableStylePropertySet;
 class PropertySetCSSStyleDeclaration;
@@ -201,6 +202,11 @@ public:
 
     const AtomicString& computedRole();
     String computedName();
+
+    // Experimental Custom Layout API
+    bool hasLayout() const;
+    LayoutWorker* layout() const;
+    void setLayout(LayoutWorker* layout);
 
     // Returns the absolute bounding box translated into screen coordinates:
     IntRect screenRect() const;

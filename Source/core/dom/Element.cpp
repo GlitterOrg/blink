@@ -119,6 +119,7 @@
 #include "platform/RuntimeEnabledFeatures.h"
 #include "platform/UserGestureIndicator.h"
 #include "platform/scroll/ScrollableArea.h"
+#include "platform/Logging.h"
 #include "wtf/BitVector.h"
 #include "wtf/HashFunctions.h"
 #include "wtf/text/CString.h"
@@ -965,6 +966,26 @@ String Element::computedName()
     document().updateLayoutIgnorePendingStylesheets();
     ScopedAXObjectCache cache(document());
     return cache->computedNameForNode(this);
+}
+
+bool Element::hasLayout() const
+{
+    return hasRareData() && elementRareData()->layout();
+}
+
+LayoutWorker* Element::layout() const
+{
+    return hasRareData() ? elementRareData()->layout() : nullptr;
+}
+
+void Element::setLayout(LayoutWorker* layout)
+{
+    ensureElementRareData().setLayout(adoptRefWillBeNoop(layout));
+
+    if (document().inStyleRecalc())
+        reattach();
+    else
+        lazyReattachIfAttached();
 }
 
 const AtomicString& Element::getAttribute(const AtomicString& localName) const
