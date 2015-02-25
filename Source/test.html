@@ -8,7 +8,9 @@
     <script>
       var layout = new LayoutWorker('mylayout.js');
       var el = document.getElementById('foo');
-      el.layout = layout;
+      setTimeout(function() {
+        el.layout = layout;
+      }, 500);
     </script>
   </body>
 </html>
