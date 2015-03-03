@@ -1,0 +1,3 @@
+interface LayoutParent {
+    readonly attribute double width; // Should be inline size.
+};

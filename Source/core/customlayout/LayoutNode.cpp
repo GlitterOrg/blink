@@ -1,7 +1,11 @@
 #include "config.h"
 #include "core/customlayout/LayoutNode.h"
+#include "core/customlayout/LayoutParent.h"
+#include "core/customlayout/LayoutChild.h"
 #include "core/rendering/RenderBox.h"
-#include "platform/geometry/LayoutPoint.h"
+#include "core/rendering/RenderBlock.h"
+#include "core/css/LayoutStyleCSSValueMapping.h"
+#include "core/css/HashTools.h"
 
 namespace blink {
 
@@ -11,7 +15,7 @@ PassRefPtrWillBeRawPtr<LayoutNode> LayoutNode::create(RenderBox* renderBox)
 }
 
 LayoutNode::LayoutNode(RenderBox* renderBox)
-  : m_renderBox(renderBox)
+    : m_renderBox(renderBox)
 {
 }
 
@@ -19,19 +23,35 @@ LayoutNode::~LayoutNode()
 {
 }
 
-double LayoutNode::maxContentInlineSize() const
+RefPtr<LayoutParent> LayoutNode::parent() const
 {
-    return m_renderBox->maxPreferredLogicalWidth().toDouble();
+    RenderBlock* parent = m_renderBox->containingBlock();
+    if (!parent->hasScriptLayoutParent())
+        parent->setScriptLayoutParent(LayoutParent::create(parent));
+    return parent->scriptLayoutParent();
 }
 
-double LayoutNode::minContentInlineSize() const
+WillBeHeapVector<LayoutChild*> LayoutNode::children() const
 {
-    return m_renderBox->minPreferredLogicalWidth().toDouble();
+    WillBeHeapVector<LayoutChild*> children;
+
+    for (RenderBox* child = m_renderBox->firstChildBox(); child; child = child->nextSiblingBox()) {
+        if (!child->hasScriptLayoutChild())
+            child->setScriptLayoutChild(LayoutChild::create(child));
+        children.append(child->scriptLayoutChild());
+    }
+
+    return children;
 }
 
-void LayoutNode::setPosition(double x, double y)
+String LayoutNode::getCSSValue(String value) const
 {
-    m_renderBox->setLocation(LayoutPoint(x, y));
+    const Property* hashTableEntry = findProperty(value.ascii().data(), value.length());
+    if (!hashTableEntry)
+        return "";
+    CSSPropertyID property = static_cast<CSSPropertyID>(hashTableEntry->id);
+
+    return LayoutStyleCSSValueMapping::get(property, m_renderBox->styleRef())->cssText();
 }
 
-} // namespace blink
+}

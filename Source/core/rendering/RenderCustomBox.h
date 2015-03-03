@@ -18,9 +18,6 @@ public:
 
 protected:
     virtual void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const override;
-
-private:
-    void layoutCustomItems();
 };
 
 } // namespace blink

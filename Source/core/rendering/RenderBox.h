@@ -23,6 +23,8 @@
 #ifndef RenderBox_h
 #define RenderBox_h
 
+#include "core/customlayout/LayoutParent.h"
+#include "core/customlayout/LayoutChild.h"
 #include "core/customlayout/LayoutNode.h"
 #include "core/layout/shapes/ShapeOutsideInfo.h"
 #include "core/rendering/RenderBoxModelObject.h"
@@ -57,7 +59,9 @@ public:
         , m_overrideLogicalContentHeight(-1)
         , m_overrideLogicalContentWidth(-1)
         , m_previousBorderBoxSize(-1, -1)
+        , m_layoutChild(nullptr)
         , m_layoutNode(nullptr)
+        , m_layoutParent(nullptr)
     {
     }
 
@@ -74,7 +78,9 @@ public:
     LayoutSize m_previousBorderBoxSize;
 
     // For Custom Layout.
+    RefPtr<LayoutChild> m_layoutChild;
     RefPtr<LayoutNode> m_layoutNode;
+    RefPtr<LayoutParent> m_layoutParent;
 };
 
 class RenderBox : public RenderBoxModelObject {
@@ -416,10 +422,20 @@ public:
     void clearSpannerPlaceholder();
     virtual RenderMultiColumnSpannerPlaceholder* spannerPlaceholder() const final { return m_rareData ? m_rareData->m_spannerPlaceholder : 0; }
 
+    // LayoutChild
+    bool hasScriptLayoutChild() const { return m_rareData && m_rareData->m_layoutChild; }
+    LayoutChild* scriptLayoutChild() const { return m_rareData ? m_rareData->m_layoutChild.get() : nullptr; }
+    void setScriptLayoutChild(PassRefPtrWillBeRawPtr<LayoutChild> layoutChild) { ensureRareData().m_layoutChild = layoutChild; }
+
     // LayoutNode
     bool hasScriptLayoutNode() const { return m_rareData && m_rareData->m_layoutNode; }
     LayoutNode* scriptLayoutNode() const { return m_rareData ? m_rareData->m_layoutNode.get() : nullptr; }
     void setScriptLayoutNode(PassRefPtrWillBeRawPtr<LayoutNode> layoutNode) { ensureRareData().m_layoutNode = layoutNode; }
+
+    // LayoutParent
+    bool hasScriptLayoutParent() const { return m_rareData && m_rareData->m_layoutParent; }
+    RefPtr<LayoutParent> scriptLayoutParent() const { return m_rareData ? m_rareData->m_layoutParent : nullptr; }
+    void setScriptLayoutParent(PassRefPtrWillBeRawPtr<LayoutParent> layoutParent) { ensureRareData().m_layoutParent = layoutParent; }
 
     virtual LayoutRect clippedOverflowRectForPaintInvalidation(const LayoutLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const override;
     virtual void mapRectToPaintInvalidationBacking(const LayoutLayerModelObject* paintInvalidationContainer, LayoutRect&, const PaintInvalidationState*) const override;

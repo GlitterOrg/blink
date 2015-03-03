@@ -6,6 +6,8 @@
 
 namespace blink {
 
+class LayoutChild;
+class LayoutParent;
 class RenderBox;
 
 class LayoutNode : public RefCountedWillBeGarbageCollectedFinalized<LayoutNode>, public ScriptWrappable {
@@ -13,9 +15,11 @@ class LayoutNode : public RefCountedWillBeGarbageCollectedFinalized<LayoutNode>,
 public:
     static PassRefPtrWillBeRawPtr<LayoutNode> create(RenderBox*);
     virtual ~LayoutNode();
-    double maxContentInlineSize() const;
-    double minContentInlineSize() const;
-    void setPosition(double x, double y);
+
+    RefPtr<LayoutParent> parent() const;
+    WillBeHeapVector<LayoutChild*> children() const;
+
+    String getCSSValue(String value) const;
 
 private:
     LayoutNode(RenderBox*);

@@ -31,6 +31,7 @@ public:
 
     // LayoutGlobalScope.idl
     LayoutGlobalScope* self() { return this; }
+    void log(String);
 
     ScriptValue fn() const { return m_fnValue; }
     void setFn(ScriptValue& value) { m_fnValue = value; }
@@ -41,8 +42,14 @@ public:
     ScriptValue calculateMaxContentInlineSize() const { return m_calculateMaxContentInlineSize; }
     void setCalculateMaxContentInlineSize(ScriptValue& value) { m_calculateMaxContentInlineSize = value; }
 
-    ScriptValue calculateHeightAndPositionChildren() const { return m_calculateHeightAndPositionChildren; }
-    void setCalculateHeightAndPositionChildren(ScriptValue& value) { m_calculateHeightAndPositionChildren = value; }
+    ScriptValue calculateWidth() const { return m_calculateWidth; }
+    void setCalculateWidth(ScriptValue& value) { m_calculateWidth = value; }
+
+    ScriptValue calculateHeight() const { return m_calculateHeight; }
+    void setCalculateHeight(ScriptValue& value) { m_calculateHeight = value; }
+
+    ScriptValue positionChildren() const { return m_positionChildren; }
+    void setPositionChildren(ScriptValue& value) { m_positionChildren = value; }
 
     // EventTarget
     virtual const AtomicString& interfaceName() const override;
@@ -91,7 +98,9 @@ private:
     ScriptValue m_fnValue;
     ScriptValue m_calculateMinContentInlineSize;
     ScriptValue m_calculateMaxContentInlineSize;
-    ScriptValue m_calculateHeightAndPositionChildren;
+    ScriptValue m_calculateWidth;
+    ScriptValue m_calculateHeight;
+    ScriptValue m_positionChildren;
 
     // ExecutionContext
     virtual const KURL& virtualURL() const override final;

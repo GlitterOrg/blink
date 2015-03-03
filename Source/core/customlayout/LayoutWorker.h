@@ -13,6 +13,7 @@ class ExceptionState;
 class ExecutionContext;
 class LayoutUnit;
 class RenderBox;
+class RenderCustomBox;
 class WorkerScriptLoader;
 
 class LayoutWorker final : public AbstractWorker, private WorkerScriptLoaderClient {
@@ -24,8 +25,11 @@ public:
     const AtomicString& type() const;
     double invoke(double, double) const;
 
-    void computeIntrinsicLogicalWidths(LayoutUnit&, LayoutUnit&, Vector<RenderBox*>&);
-    void calculateHeightAndPositionChildren(LayoutUnit&, Vector<RenderBox*>&);
+    void computeIntrinsicLogicalWidths(LayoutUnit&, LayoutUnit&, RenderCustomBox&);
+
+    void calculateWidth(LayoutUnit&, RenderCustomBox&);
+    void calculateHeight(LayoutUnit&, RenderCustomBox&);
+    void positionChildren(RenderCustomBox&);
 
     virtual const AtomicString& interfaceName() const override;
 

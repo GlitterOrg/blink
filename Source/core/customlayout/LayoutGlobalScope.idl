@@ -3,8 +3,13 @@
 ] interface LayoutGlobalScope : EventTarget {
     [Replaceable] readonly attribute LayoutGlobalScope self;
     attribute Function fn;
+
     attribute Function calculateMinContentInlineSize;
     attribute Function calculateMaxContentInlineSize;
-    attribute Function calculateHeightAndPositionChildren;
+    attribute Function calculateWidth; // should be calculateInlineSize
+    attribute Function calculateHeight; // should be calculateBoxSize?
+    attribute Function positionChildren;
+
+    void log(DOMString str);
 };
 LayoutGlobalScope implements WindowBase64;

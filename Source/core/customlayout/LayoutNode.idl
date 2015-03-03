@@ -1,5 +1,4 @@
 interface LayoutNode {
-    double maxContentInlineSize();
-    double minContentInlineSize();
-    void setPosition(double x, double y); // TODO better names for x, y.
+    readonly attribute LayoutParent parent;
+    readonly attribute sequence<LayoutChild> children;
 };

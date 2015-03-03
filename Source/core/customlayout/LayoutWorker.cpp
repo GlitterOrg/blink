@@ -8,8 +8,9 @@
 #include "bindings/core/v8/ToV8.h"
 #include "core/events/MessageEvent.h"
 #include "core/customlayout/LayoutArgs.h"
-#include "core/customlayout/LayoutNode.h"
+#include "core/customlayout/LayoutChild.h"
 #include "core/rendering/RenderBox.h"
+#include "core/rendering/RenderCustomBox.h"
 #include "core/workers/WorkerScriptLoader.h"
 #include "platform/LayoutUnit.h"
 #include "platform/Logging.h"
@@ -67,30 +68,17 @@ double LayoutWorker::invoke(double arg1, double arg2) const
     return v8::Handle<v8::Number>::Cast(result)->Value();
 }
 
-void LayoutWorker::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth, Vector<RenderBox*>& children)
+void LayoutWorker::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth, RenderCustomBox& renderer)
 {
     ScriptState::Scope scope(m_layoutGlobalScope->calculateMinContentInlineSize().scriptState());
     LayoutScriptController* script = m_layoutGlobalScope->script();
     v8::Isolate* isolate = script->isolate();
 
-    v8::Handle<v8::Array> arr = v8::Array::New(isolate, children.size());
+    if (!renderer.hasScriptLayoutNode())
+        renderer.setScriptLayoutNode(LayoutNode::create(&renderer));
+    v8::Handle<v8::Value> node = toV8(renderer.scriptLayoutNode(), script->context()->Global(), isolate);
 
-    for (size_t i = 0; i < children.size(); ++i) {
-        RenderBox* child = children[i];
-
-        // Create a LayoutNode wrapper for each child, if it doesn't exist already.
-        if (!child->hasScriptLayoutNode())
-            child->setScriptLayoutNode(LayoutNode::create(child));
-
-        // NOTE make this a persistent handle on RenderBoxRareData? How
-        // expensive is toV8? I think ScriptWrappable contains m_wrapper which
-        // is persistent.
-        v8::Handle<v8::Value> node = toV8(child->scriptLayoutNode(), script->context()->Global(), isolate);
-
-        arr->Set(i, node);
-    }
-
-    v8::Handle<v8::Value> argv[] = { arr };
+    v8::Handle<v8::Value> argv[] = { node };
     v8::Handle<v8::Function> minFn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->calculateMinContentInlineSize().v8Value());
     v8::Handle<v8::Value> minResult = script->callFunction(minFn, v8::Null(isolate), 1, argv);
     minLogicalWidth = LayoutUnit(v8::Handle<v8::Number>::Cast(minResult)->Value());
@@ -100,33 +88,51 @@ void LayoutWorker::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, La
     maxLogicalWidth = LayoutUnit(v8::Handle<v8::Number>::Cast(maxResult)->Value());
 }
 
-void LayoutWorker::calculateHeightAndPositionChildren(LayoutUnit& height, Vector<RenderBox*>& children)
+void LayoutWorker::calculateWidth(LayoutUnit& width, RenderCustomBox& renderer)
 {
-    ScriptState::Scope scope(m_layoutGlobalScope->calculateHeightAndPositionChildren().scriptState());
+    ScriptState::Scope scope(m_layoutGlobalScope->calculateWidth().scriptState());
     LayoutScriptController* script = m_layoutGlobalScope->script();
     v8::Isolate* isolate = script->isolate();
 
-    v8::Handle<v8::Array> arr = v8::Array::New(isolate, children.size());
+    if (!renderer.hasScriptLayoutNode())
+        renderer.setScriptLayoutNode(LayoutNode::create(&renderer));
+    v8::Handle<v8::Value> node = toV8(renderer.scriptLayoutNode(), script->context()->Global(), isolate);
 
-    for (size_t i = 0; i < children.size(); ++i) {
-        RenderBox* child = children[i];
+    v8::Handle<v8::Value> argv[] = { node };
+    v8::Handle<v8::Function> fn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->calculateWidth().v8Value());
+    v8::Handle<v8::Value> result = script->callFunction(fn, v8::Null(isolate), 1, argv);
+    width = LayoutUnit(v8::Handle<v8::Number>::Cast(result)->Value());
+}
 
-        // Create a LayoutNode wrapper for each child, if it doesn't exist already.
-        if (!child->hasScriptLayoutNode())
-            child->setScriptLayoutNode(LayoutNode::create(child));
+void LayoutWorker::calculateHeight(LayoutUnit& height, RenderCustomBox& renderer)
+{
+    ScriptState::Scope scope(m_layoutGlobalScope->calculateHeight().scriptState());
+    LayoutScriptController* script = m_layoutGlobalScope->script();
+    v8::Isolate* isolate = script->isolate();
 
-        // NOTE make this a persistent handle on RenderBoxRareData? How
-        // expensive is toV8? I think ScriptWrappable contains m_wrapper which
-        // is persistent.
-        v8::Handle<v8::Value> node = toV8(child->scriptLayoutNode(), script->context()->Global(), isolate);
+    if (!renderer.hasScriptLayoutNode())
+        renderer.setScriptLayoutNode(LayoutNode::create(&renderer));
+    v8::Handle<v8::Value> node = toV8(renderer.scriptLayoutNode(), script->context()->Global(), isolate);
 
-        arr->Set(i, node);
-    }
-
-    v8::Handle<v8::Value> argv[] = { arr };
-    v8::Handle<v8::Function> fn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->calculateHeightAndPositionChildren().v8Value());
+    v8::Handle<v8::Value> argv[] = { node };
+    v8::Handle<v8::Function> fn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->calculateHeight().v8Value());
     v8::Handle<v8::Value> result = script->callFunction(fn, v8::Null(isolate), 1, argv);
     height = LayoutUnit(v8::Handle<v8::Number>::Cast(result)->Value());
+}
+
+void LayoutWorker::positionChildren(RenderCustomBox& renderer)
+{
+    ScriptState::Scope scope(m_layoutGlobalScope->positionChildren().scriptState());
+    LayoutScriptController* script = m_layoutGlobalScope->script();
+    v8::Isolate* isolate = script->isolate();
+
+    if (!renderer.hasScriptLayoutNode())
+        renderer.setScriptLayoutNode(LayoutNode::create(&renderer));
+    v8::Handle<v8::Value> node = toV8(renderer.scriptLayoutNode(), script->context()->Global(), isolate);
+
+    v8::Handle<v8::Value> argv[] = { node };
+    v8::Handle<v8::Function> fn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->positionChildren().v8Value());
+    script->callFunction(fn, v8::Null(isolate), 1, argv);
 }
 
 const AtomicString& LayoutWorker::interfaceName() const
