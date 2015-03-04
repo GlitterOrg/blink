@@ -31,7 +31,6 @@ public:
 
     // LayoutGlobalScope.idl
     LayoutGlobalScope* self() { return this; }
-    void log(String);
 
     ScriptValue fn() const { return m_fnValue; }
     void setFn(ScriptValue& value) { m_fnValue = value; }

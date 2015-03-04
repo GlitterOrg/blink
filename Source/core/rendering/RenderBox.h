@@ -434,7 +434,7 @@ public:
 
     // LayoutParent
     bool hasScriptLayoutParent() const { return m_rareData && m_rareData->m_layoutParent; }
-    RefPtr<LayoutParent> scriptLayoutParent() const { return m_rareData ? m_rareData->m_layoutParent : nullptr; }
+    LayoutParent* scriptLayoutParent() const { return m_rareData ? m_rareData->m_layoutParent.get() : nullptr; }
     void setScriptLayoutParent(PassRefPtrWillBeRawPtr<LayoutParent> layoutParent) { ensureRareData().m_layoutParent = layoutParent; }
 
     virtual LayoutRect clippedOverflowRectForPaintInvalidation(const LayoutLayerModelObject* paintInvalidationContainer, const PaintInvalidationState* = 0) const override;

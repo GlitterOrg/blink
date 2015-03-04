@@ -7,6 +7,8 @@
 #include "core/css/LayoutStyleCSSValueMapping.h"
 #include "core/css/HashTools.h"
 
+#include "platform/Logging.h"
+
 namespace blink {
 
 PassRefPtrWillBeRawPtr<LayoutNode> LayoutNode::create(RenderBox* renderBox)
@@ -23,7 +25,7 @@ LayoutNode::~LayoutNode()
 {
 }
 
-RefPtr<LayoutParent> LayoutNode::parent() const
+LayoutParent* LayoutNode::parent() const
 {
     RenderBlock* parent = m_renderBox->containingBlock();
     if (!parent->hasScriptLayoutParent())
@@ -52,6 +54,11 @@ String LayoutNode::getCSSValue(String value) const
     CSSPropertyID property = static_cast<CSSPropertyID>(hashTableEntry->id);
 
     return LayoutStyleCSSValueMapping::get(property, m_renderBox->styleRef())->cssText();
+}
+
+void LayoutNode::log(String str) const
+{
+    WTF_LOG(NotYetImplemented, "log: %s\n", str.ascii().data());
 }
 
 }

@@ -120,11 +120,6 @@ void LayoutGlobalScope::logExceptionToConsole(const String& errorMessage, int sc
     WTF_LOG(NotYetImplemented, "logExceptionToConsole: %s\n", errorMessage.ascii().data());
 }
 
-void LayoutGlobalScope::log(String str)
-{
-    WTF_LOG(NotYetImplemented, "log: %s\n", str.ascii().data());
-}
-
 void LayoutGlobalScope::trace(Visitor* visitor)
 {
 /*#if ENABLE(OILPAN)

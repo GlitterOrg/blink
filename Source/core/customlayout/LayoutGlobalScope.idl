@@ -9,7 +9,5 @@
     attribute Function calculateWidth; // should be calculateInlineSize
     attribute Function calculateHeight; // should be calculateBoxSize?
     attribute Function positionChildren;
-
-    void log(DOMString str);
 };
 LayoutGlobalScope implements WindowBase64;

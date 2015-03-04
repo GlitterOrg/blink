@@ -21,7 +21,22 @@ self.calculateMaxContentInlineSize = function(node) {
 };
 
 self.calculateWidth = function(node) {
-  //log(node.getCSSValue('width')); TODO fix logging.
+  var width = node.getCSSValue('width');
+  node.log('' + width);
+
+  // Might have a fixed width or percent.
+  // TODO add support for calc()
+  // TODO add support for other units apart from 'px'.
+  if (width != 'auto') {
+    var val = parseFloat(width);
+    var unit = width.match(/[^\d]+$/)[0];
+    if (unit == '%') {
+      return val / 100 * node.parent.width;
+    } else {
+      return val;
+    }
+  }
+
   var children = node.children;
   var minWidth = calculateMinContentInlineSize(node);
   var maxWidth = calculateMaxContentInlineSize(node);

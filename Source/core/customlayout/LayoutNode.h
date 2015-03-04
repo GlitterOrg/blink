@@ -16,10 +16,11 @@ public:
     static PassRefPtrWillBeRawPtr<LayoutNode> create(RenderBox*);
     virtual ~LayoutNode();
 
-    RefPtr<LayoutParent> parent() const;
+    LayoutParent* parent() const;
     WillBeHeapVector<LayoutChild*> children() const;
 
     String getCSSValue(String value) const;
+    void log(String) const;
 
 private:
     LayoutNode(RenderBox*);
