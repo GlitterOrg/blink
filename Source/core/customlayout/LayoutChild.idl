@@ -1,5 +1,14 @@
 interface LayoutChild {
+    DOMString getCSSValue(DOMString value);
+
     double maxContentInlineSize();
     double minContentInlineSize();
     void setPosition(double x, double y); // TODO better names for x, y.
+
+    void constrainWidth(double width);
+    double measureWidth();
+    double measureHeight();
+
+    readonly attribute double width;
+    readonly attribute double height;
 };

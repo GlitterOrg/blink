@@ -1,0 +1,16 @@
+<html>
+  <body>
+    <div id="foo">
+      <div style="content:'1,1'">Foo foo foo.</div>
+      <div style="content:'2,2'">Blah blah blah.</div>
+      <div style="content:'1,2'">Quix quix quix.</div>
+    </div>
+    <script>
+      var layout = new LayoutWorker('gridlayout.js');
+      var el = document.getElementById('foo');
+      setTimeout(function() {
+        el.layout = layout;
+      }, 500);
+    </script>
+  </body>
+</html>

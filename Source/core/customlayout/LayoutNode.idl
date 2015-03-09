@@ -1,6 +1,8 @@
 interface LayoutNode {
+    DOMString getCSSValue(DOMString value);
+
     readonly attribute LayoutParent parent;
     readonly attribute sequence<LayoutChild> children;
+
     void log(DOMString str);
-    DOMString getCSSValue(DOMString value);
 };

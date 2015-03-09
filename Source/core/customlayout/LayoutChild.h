@@ -13,9 +13,19 @@ class LayoutChild : public RefCountedWillBeGarbageCollectedFinalized<LayoutChild
 public:
     static PassRefPtrWillBeRawPtr<LayoutChild> create(RenderBox*);
     virtual ~LayoutChild();
+
+    String getCSSValue(String value) const;
+
     double maxContentInlineSize() const;
     double minContentInlineSize() const;
     void setPosition(double x, double y);
+
+    void constrainWidth(double width);
+    double measureWidth();
+    double measureHeight();
+
+    double width() const;
+    double height() const;
 
 private:
     LayoutChild(RenderBox*);

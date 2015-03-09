@@ -22,6 +22,7 @@ self.calculateMaxContentInlineSize = function(node) {
 
 self.calculateWidth = function(node) {
   var width = node.getCSSValue('width');
+  node.log('' + node.getCSSValue('content'));
   node.log('' + width);
 
   // Might have a fixed width or percent.
@@ -49,20 +50,28 @@ self.calculateWidth = function(node) {
 };
 
 self.calculateHeight = function(node) {
+  var width = 50;
   var children = node.children;
   var height = 0;
   for (var i = 0; i < children.length; i++) {
     // TODO constrain child to width.
     // TODO measure child width.
     var child = children[i];
-    height += 26;
+    child.constrainWidth(width);
+    height += child.measureHeight();
   }
   return height;
 };
 
+// self.growChildrenHeight = function(node) { };
+// TODO add this API call to support things like stretching in flexbox.
+
 self.positionChildren = function(node) {
   var children = node.children;
+  var heightAcc = 0;
   for (var i = 0; i < children.length; i++) {
-    children[i].setPosition(i * 30, i * 30);
+    var child = children[i];
+    children[i].setPosition(i * 30, heightAcc);
+    heightAcc += child.height;
   }
 };

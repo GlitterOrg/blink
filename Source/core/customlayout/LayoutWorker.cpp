@@ -58,12 +58,20 @@ double LayoutWorker::invoke(double arg1, double arg2) const
 
     RefPtr<LayoutArgs> args = LayoutArgs::create(arg1, arg2);
     v8::Isolate* isolate = m_layoutGlobalScope->script()->isolate();
+    v8::TryCatch tryCatch(isolate);
     LayoutScriptController* script = m_layoutGlobalScope->script();
 
     v8::Handle<v8::Value> argsHandle = toV8(args.get(), script->context()->Global(), isolate);
     v8::Handle<v8::Value> argv[] = { argsHandle };
     v8::Handle<v8::Function> fn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->fn().v8Value());
     v8::Handle<v8::Value> result = script->callFunction(fn, v8::Null(isolate), 1, argv);
+
+    if (tryCatch.HasCaught()) {
+      v8::String::Utf8Value exception_str(tryCatch.Exception());
+      const char* cstr = *exception_str;
+      WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+      return 0; // TODO fail should revert to a sensible renderer.
+    }
 
     return v8::Handle<v8::Number>::Cast(result)->Value();
 }
@@ -73,6 +81,7 @@ void LayoutWorker::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, La
     ScriptState::Scope scope(m_layoutGlobalScope->calculateMinContentInlineSize().scriptState());
     LayoutScriptController* script = m_layoutGlobalScope->script();
     v8::Isolate* isolate = script->isolate();
+    v8::TryCatch tryCatch(isolate);
 
     if (!renderer.hasScriptLayoutNode())
         renderer.setScriptLayoutNode(LayoutNode::create(&renderer));
@@ -81,11 +90,25 @@ void LayoutWorker::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, La
     v8::Handle<v8::Value> argv[] = { node };
     v8::Handle<v8::Function> minFn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->calculateMinContentInlineSize().v8Value());
     v8::Handle<v8::Value> minResult = script->callFunction(minFn, v8::Null(isolate), 1, argv);
-    minLogicalWidth = LayoutUnit(v8::Handle<v8::Number>::Cast(minResult)->Value());
+
+    if (tryCatch.HasCaught()) {
+        v8::String::Utf8Value exception_str(tryCatch.Exception());
+        const char* cstr = *exception_str;
+        WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+    } else {
+        minLogicalWidth = LayoutUnit(v8::Handle<v8::Number>::Cast(minResult)->Value());
+    }
 
     v8::Handle<v8::Function> maxFn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->calculateMaxContentInlineSize().v8Value());
     v8::Handle<v8::Value> maxResult = script->callFunction(maxFn, v8::Null(isolate), 1, argv);
-    maxLogicalWidth = LayoutUnit(v8::Handle<v8::Number>::Cast(maxResult)->Value());
+
+    if (tryCatch.HasCaught()) {
+        v8::String::Utf8Value exception_str(tryCatch.Exception());
+        const char* cstr = *exception_str;
+        WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+    } else {
+        maxLogicalWidth = LayoutUnit(v8::Handle<v8::Number>::Cast(maxResult)->Value());
+    }
 }
 
 void LayoutWorker::calculateWidth(LayoutUnit& width, RenderCustomBox& renderer)
@@ -93,6 +116,7 @@ void LayoutWorker::calculateWidth(LayoutUnit& width, RenderCustomBox& renderer)
     ScriptState::Scope scope(m_layoutGlobalScope->calculateWidth().scriptState());
     LayoutScriptController* script = m_layoutGlobalScope->script();
     v8::Isolate* isolate = script->isolate();
+    v8::TryCatch tryCatch(isolate);
 
     if (!renderer.hasScriptLayoutNode())
         renderer.setScriptLayoutNode(LayoutNode::create(&renderer));
@@ -101,7 +125,14 @@ void LayoutWorker::calculateWidth(LayoutUnit& width, RenderCustomBox& renderer)
     v8::Handle<v8::Value> argv[] = { node };
     v8::Handle<v8::Function> fn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->calculateWidth().v8Value());
     v8::Handle<v8::Value> result = script->callFunction(fn, v8::Null(isolate), 1, argv);
-    width = LayoutUnit(v8::Handle<v8::Number>::Cast(result)->Value());
+
+    if (tryCatch.HasCaught()) {
+        v8::String::Utf8Value exception_str(tryCatch.Exception());
+        const char* cstr = *exception_str;
+        WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+    } else {
+        width = LayoutUnit(v8::Handle<v8::Number>::Cast(result)->Value());
+    }
 }
 
 void LayoutWorker::calculateHeight(LayoutUnit& height, RenderCustomBox& renderer)
@@ -109,6 +140,7 @@ void LayoutWorker::calculateHeight(LayoutUnit& height, RenderCustomBox& renderer
     ScriptState::Scope scope(m_layoutGlobalScope->calculateHeight().scriptState());
     LayoutScriptController* script = m_layoutGlobalScope->script();
     v8::Isolate* isolate = script->isolate();
+    v8::TryCatch tryCatch(isolate);
 
     if (!renderer.hasScriptLayoutNode())
         renderer.setScriptLayoutNode(LayoutNode::create(&renderer));
@@ -117,7 +149,14 @@ void LayoutWorker::calculateHeight(LayoutUnit& height, RenderCustomBox& renderer
     v8::Handle<v8::Value> argv[] = { node };
     v8::Handle<v8::Function> fn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->calculateHeight().v8Value());
     v8::Handle<v8::Value> result = script->callFunction(fn, v8::Null(isolate), 1, argv);
-    height = LayoutUnit(v8::Handle<v8::Number>::Cast(result)->Value());
+
+    if (tryCatch.HasCaught()) {
+        v8::String::Utf8Value exception_str(tryCatch.Exception());
+        const char* cstr = *exception_str;
+        WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+    } else {
+        height = LayoutUnit(v8::Handle<v8::Number>::Cast(result)->Value());
+    }
 }
 
 void LayoutWorker::positionChildren(RenderCustomBox& renderer)
@@ -125,6 +164,7 @@ void LayoutWorker::positionChildren(RenderCustomBox& renderer)
     ScriptState::Scope scope(m_layoutGlobalScope->positionChildren().scriptState());
     LayoutScriptController* script = m_layoutGlobalScope->script();
     v8::Isolate* isolate = script->isolate();
+    v8::TryCatch tryCatch(isolate);
 
     if (!renderer.hasScriptLayoutNode())
         renderer.setScriptLayoutNode(LayoutNode::create(&renderer));
@@ -133,6 +173,12 @@ void LayoutWorker::positionChildren(RenderCustomBox& renderer)
     v8::Handle<v8::Value> argv[] = { node };
     v8::Handle<v8::Function> fn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->positionChildren().v8Value());
     script->callFunction(fn, v8::Null(isolate), 1, argv);
+
+    if (tryCatch.HasCaught()) {
+        v8::String::Utf8Value exception_str(tryCatch.Exception());
+        const char* cstr = *exception_str;
+        WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+    }
 }
 
 const AtomicString& LayoutWorker::interfaceName() const
