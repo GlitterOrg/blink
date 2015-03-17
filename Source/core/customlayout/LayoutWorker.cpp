@@ -67,9 +67,11 @@ double LayoutWorker::invoke(double arg1, double arg2) const
     v8::Handle<v8::Value> result = script->callFunction(fn, v8::Null(isolate), 1, argv);
 
     if (tryCatch.HasCaught()) {
+      #ifndef NDEBUG
       v8::String::Utf8Value exception_str(tryCatch.Exception());
       const char* cstr = *exception_str;
       WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+      #endif
       return 0; // TODO fail should revert to a sensible renderer.
     }
 
@@ -92,9 +94,11 @@ void LayoutWorker::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, La
     v8::Handle<v8::Value> minResult = script->callFunction(minFn, v8::Null(isolate), 1, argv);
 
     if (tryCatch.HasCaught()) {
+        #ifndef NDEBUG
         v8::String::Utf8Value exception_str(tryCatch.Exception());
         const char* cstr = *exception_str;
         WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+        #endif
     } else {
         minLogicalWidth = LayoutUnit(v8::Handle<v8::Number>::Cast(minResult)->Value());
     }
@@ -103,9 +107,11 @@ void LayoutWorker::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, La
     v8::Handle<v8::Value> maxResult = script->callFunction(maxFn, v8::Null(isolate), 1, argv);
 
     if (tryCatch.HasCaught()) {
+        #ifndef NDEBUG
         v8::String::Utf8Value exception_str(tryCatch.Exception());
         const char* cstr = *exception_str;
         WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+        #endif
     } else {
         maxLogicalWidth = LayoutUnit(v8::Handle<v8::Number>::Cast(maxResult)->Value());
     }
@@ -127,9 +133,11 @@ void LayoutWorker::calculateWidth(LayoutUnit& width, RenderCustomBox& renderer)
     v8::Handle<v8::Value> result = script->callFunction(fn, v8::Null(isolate), 1, argv);
 
     if (tryCatch.HasCaught()) {
+        #ifndef NDEBUG
         v8::String::Utf8Value exception_str(tryCatch.Exception());
         const char* cstr = *exception_str;
         WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+        #endif
     } else {
         width = LayoutUnit(v8::Handle<v8::Number>::Cast(result)->Value());
     }
@@ -151,9 +159,11 @@ void LayoutWorker::calculateHeight(LayoutUnit& height, RenderCustomBox& renderer
     v8::Handle<v8::Value> result = script->callFunction(fn, v8::Null(isolate), 1, argv);
 
     if (tryCatch.HasCaught()) {
+        #ifndef NDEBUG
         v8::String::Utf8Value exception_str(tryCatch.Exception());
         const char* cstr = *exception_str;
         WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
+        #endif
     } else {
         height = LayoutUnit(v8::Handle<v8::Number>::Cast(result)->Value());
     }
@@ -174,11 +184,13 @@ void LayoutWorker::positionChildren(RenderCustomBox& renderer)
     v8::Handle<v8::Function> fn = v8::Handle<v8::Function>::Cast(m_layoutGlobalScope->positionChildren().v8Value());
     script->callFunction(fn, v8::Null(isolate), 1, argv);
 
+    #ifndef NDEBUG
     if (tryCatch.HasCaught()) {
         v8::String::Utf8Value exception_str(tryCatch.Exception());
         const char* cstr = *exception_str;
         WTF_LOG(NotYetImplemented, "v8 exception: %s\n", cstr);
     }
+    #endif
 }
 
 const AtomicString& LayoutWorker::interfaceName() const

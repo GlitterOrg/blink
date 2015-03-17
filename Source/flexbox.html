@@ -1,0 +1,39 @@
+<html>
+  <body>
+    <div id="foo">
+      <div style="font-size: 12px; flex-basis: 100px;">Foo foo foo.</div>
+      <div style="font-size: 14px; flex-basis: 100px; flex-grow: 1;">Blah blah blah.</div>
+      <div style="font-size: 16px; flex-basis: 100px; flex-grow: 2;">Quix quix quix.</div>
+    </div>
+    <div style="display: flex;" id="bar">
+      <div style="font-size: 12px; flex-basis: 100px;">Foo foo foo.</div>
+      <div style="font-size: 14px; flex-basis: 100px; flex-grow: 1;">Blah blah blah.</div>
+      <div style="font-size: 16px; flex-basis: 100px; flex-grow: 2;">Quix quix quix.</div>
+    </div>
+    <script>
+      var layout = new LayoutWorker('flexboxlayout.js');
+      var el = document.getElementById('foo');
+      setTimeout(function() {
+        el.layout = layout;
+      }, 500);
+
+      var vals = [];
+      var benchmark = function(el) {
+          vals = [];
+          var start = window.performance.now();
+          for (var i = 100; i < 400; i++) {
+            el.style.width = i + 'px';
+            vals.push(el.children[2].offsetTop);
+            el.children[0].flexGrow = i % 3;
+            vals.push(el.children[1].offsetTop);
+          }
+          console.log(window.performance.now() - start);
+      };
+
+      setTimeout(function() {
+        benchmark(document.getElementById('foo'));
+        benchmark(document.getElementById('bar'));
+      }, 600);
+    </script>
+  </body>
+</html>

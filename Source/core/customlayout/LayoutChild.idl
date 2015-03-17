@@ -6,7 +6,10 @@ interface LayoutChild {
     void setPosition(double x, double y); // TODO better names for x, y.
 
     void constrainWidth(double width);
+    void clearOverrideSize();
+
     double measureWidth();
+    double measureWidthUsing(DOMString widthStr, double availibleSpace, boolean mainSize);
     double measureHeight();
 
     readonly attribute double width;

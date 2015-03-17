@@ -83,10 +83,12 @@ ScriptValue LayoutScriptController::evaluate(const String& script, const String&
         return ScriptValue();
     }
 
+#ifndef NDEBUG
     if (block.HasCaught()) {
         v8::Local<v8::Message> message = block.Message();
         WTF_LOG(NotYetImplemented, "Caught error. %s\n", toCoreString(message->Get()).ascii().data());
     }
+#endif
 
     if (result.IsEmpty() || result->IsUndefined())
         return ScriptValue();

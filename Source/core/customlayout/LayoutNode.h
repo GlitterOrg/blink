@@ -20,6 +20,8 @@ public:
     WillBeHeapVector<LayoutChild*> children() const;
 
     String getCSSValue(String value) const;
+    double width() const;
+    double height() const;
     void log(String) const;
 
 private:

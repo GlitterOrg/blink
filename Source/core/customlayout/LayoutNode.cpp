@@ -56,6 +56,15 @@ String LayoutNode::getCSSValue(String value) const
     return LayoutStyleCSSValueMapping::get(property, m_renderBox->styleRef())->cssText();
 }
 
+double LayoutNode::width() const
+{
+  return m_renderBox->size().width().toDouble(); // should be inline size. need to add safety here.
+}
+
+double LayoutNode::height() const
+{
+  return m_renderBox->size().height().toDouble(); // should be box size. need to add safety here.
+}
 void LayoutNode::log(String str) const
 {
     WTF_LOG(NotYetImplemented, "log: %s\n", str.ascii().data());

@@ -4,5 +4,9 @@ interface LayoutNode {
     readonly attribute LayoutParent parent;
     readonly attribute sequence<LayoutChild> children;
 
+    readonly attribute double width; // Should be inline size, should only be availible in calculateHeight phase.
+    readonly attribute double height; // Should be box size, should only be availible in calculateHeight phase.
+
     void log(DOMString str);
+
 };

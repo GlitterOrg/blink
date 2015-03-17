@@ -2,6 +2,7 @@
 #define LayoutChild_h
 
 #include "bindings/core/v8/ScriptWrappable.h"
+#include "core/rendering/RenderBox.h"
 #include "wtf/RefPtr.h"
 
 namespace blink {
@@ -21,7 +22,10 @@ public:
     void setPosition(double x, double y);
 
     void constrainWidth(double width);
+    void clearOverrideSize();
+
     double measureWidth();
+    double measureWidthUsing(String, double, bool);
     double measureHeight();
 
     double width() const;

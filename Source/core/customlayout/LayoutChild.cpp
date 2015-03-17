@@ -1,9 +1,18 @@
 #include "config.h"
+
 #include "core/customlayout/LayoutChild.h"
 #include "core/rendering/RenderBox.h"
+#include "core/dom/Document.h"
+#include "core/dom/Node.h"
+#include "core/layout/style/LayoutStyle.h"
 #include "platform/geometry/LayoutPoint.h"
+#include "core/css/CSSPrimitiveValueMappings.h"
+#include "core/css/CSSToLengthConversionData.h"
 #include "core/css/LayoutStyleCSSValueMapping.h"
 #include "core/css/HashTools.h"
+#include "core/css/StylePropertySet.h"
+
+#include "platform/Logging.h"
 
 namespace blink {
 
@@ -28,7 +37,7 @@ String LayoutChild::getCSSValue(String value) const
         return "";
     CSSPropertyID property = static_cast<CSSPropertyID>(hashTableEntry->id);
 
-    return LayoutStyleCSSValueMapping::get(property, m_renderBox->styleRef())->cssText();
+    return LayoutStyleCSSValueMapping::get(property, m_renderBox->styleRef(), m_renderBox, m_renderBox->node())->cssText();
 }
 
 double LayoutChild::maxContentInlineSize() const
@@ -48,8 +57,15 @@ void LayoutChild::setPosition(double x, double y)
 
 void LayoutChild::constrainWidth(double width)
 {
-    //m_renderBox->setOverrideLogicalContentWidth(width);
-    m_renderBox->setOverrideContainingBlockContentLogicalWidth(LayoutUnit(width));
+    m_renderBox->setOverrideLogicalContentWidth(width);
+    m_renderBox->setNeedsLayout(MarkOnlyThis);
+    m_renderBox->layout();
+    //m_renderBox->setOverrideContainingBlockContentLogicalWidth(LayoutUnit(width));
+}
+
+void LayoutChild::clearOverrideSize()
+{
+    m_renderBox->clearOverrideSize();
 }
 
 double LayoutChild::measureWidth()
@@ -59,10 +75,25 @@ double LayoutChild::measureWidth()
     return width();
 }
 
+double LayoutChild::measureWidthUsing(String widthStr, double availibleSpace, bool mainSize)
+{
+  SizeType sizeType = mainSize ? MainOrPreferredSize : MinSize; // TODO accept MaxSize
+  LayoutUnit space(availibleSpace);
+
+  PassRefPtrWillBeRawPtr<MutableStylePropertySet> propertySet = MutableStylePropertySet::create();
+  propertySet->setProperty(CSSPropertyWidth, widthStr);
+  CSSValue* value = propertySet->getPropertyCSSValue(CSSPropertyWidth).get();
+  const LayoutStyle* rootStyle = m_renderBox->document().documentElement()->renderer()->style();
+  CSSToLengthConversionData conversionData(m_renderBox->style(), rootStyle, m_renderBox->view(), m_renderBox->style()->effectiveZoom());
+  Length size = toCSSPrimitiveValue(value)->convertToLength<AnyConversion>(conversionData);
+
+  return m_renderBox->computeLogicalWidthUsing(sizeType, size, space, m_renderBox->containingBlock()).toDouble();
+}
+
 double LayoutChild::measureHeight()
 {
     m_renderBox->setNeedsLayout(MarkOnlyThis);
-    m_renderBox->layout();
+    m_renderBox->forceChildLayout();
     return height();
 }
 
