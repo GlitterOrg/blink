@@ -2,6 +2,14 @@ self.fn = function(args) {
   return args.arg1 + args.arg2 + 2;
 };
 
+self.doLayout = function(node) {
+  var width = self.calculateWidth(node);
+  node.setWidth(width);
+  var height = self.calculateHeight(node);
+  node.setHeight(height);
+  self.positionChildren(node);
+};
+
 self.calculateMinContentInlineSize = function(node) {
   var children = node.children;
   var minContentInlineSize = 0;
@@ -41,55 +49,59 @@ self.calculateWidth = function(node) {
   return node.parent.width;
 };
 
-var flexGrow = function(child) {
-  return Number(child.getCSSValue('flex-grow')) || 0;
+var flexGrow = function(child, i) {
+  return props[i][0]; //props[i]['flex-grow']; // Number(child.getCSSValue('flex-grow')) || 0;
 };
 
-var flexShrink = function(child) {
-  return Number(child.getCSSValue('flex-shrink')) || 1;
+var flexShrink = function(child, i) {
+  return props[i][1]; //props[i]['flex-shrink']; //Number(child.getCSSValue('flex-shrink')) || 1;
 };
 
-var alignSelf = function(child) {
-  return child.getCSSValue('align-self') || 'flex-start';
+var alignSelf = function(child, i) {
+  return props[i][4] || 'flex-start'; //props[i]['align-self'] || 'flex-start'; //child.getCSSValue('align-self') || 'flex-start';
 };
 
 var sortChildren = function(children) {
   return children; // TODO do a stable sort.
 };
 
-var flexBasisForChild = function(child) {
-  var flexBasis = child.getCSSValue('flex-basis');
+var flexBasisForChild = function(child, i) {
+  var flexBasis = props[i][2]; // props[i]['flex-basis']; //child.getCSSValue('flex-basis');
   if (flexBasis == 'auto') {
-    return child.getCSSValue('width');
+    return props[i][3]; //props[i]['width']; //child.getCSSValue('width');
   }
 
   return flexBasis;
 };
 
-var preferredMainAxisContentExtentForChild = function(child, parentSize) {
+var preferredMainAxisContentExtentForChild = function(child, parentSize, i) {
   child.clearOverrideSize(); // TODO missing this API call, what does it do?
 
-  var flexBasisStr = flexBasisForChild(child);
+  var flexBasisStr = flexBasisForChild(child, i);
   if (flexBasisStr == 'auto') { // preferredMainAxisExtentDependsOnLayout
     return child.maxContentInlineSize();
   }
 
-  return Math.max(0, child.measureWidthUsing(flexBasisStr, parentSize, true));
+  if (flexBasisStr.endsWith('px')) {
+    return Math.max(0, child.measureWidthUsingFixed(parseInt(flexBasisStr, 10), parentSize, true));
+  } else {
+    return Math.max(0, child.measureWidthUsing(flexBasisStr, parentSize, true));
+  }
 };
 
-var adjustChildSizeForMinAndMax = function(child, childSize, parentSize) {
-  var max = child.getCSSValue('max-width');
+var adjustChildSizeForMinAndMax = function(child, childSize, parentSize, i) {
+  var max = props[i][5]; //props[i]['max-width']; // child.getCSSValue('max-width');
   if (max.endsWith('px')) {
-    var maxExtent = child.measureWidthUsing(max, parentSize, false);
+    var maxExtent = child.measureWidthUsingFixed(parseInt(max, 10), parentSize, false);
     if (maxExtent != -1 && childSize > maxExtent) {
       childSize = maxExtent;
     }
   }
 
-  var min = child.getCSSValue('min-width');
+  var min = props[i][6]; //props[i]['min-width']; //child.getCSSValue('min-width');
   var minExtent = 0;
   if (min.endsWith('px')) {
-    minExtent = child.measureWidthUsing(min, parentSize, false);
+    minExtent = child.measureWidthUsingFixed(parseInt(min, 10), parentSize, false);
   }
 
   return Math.max(childSize, minExtent);
@@ -135,19 +147,19 @@ var computeFlexMetrics = function(children, parentSize) {
     // NOTE skipped out of flow positioned children here.
     var child = children[i];
 
-    var childMainAxisExtent = preferredMainAxisContentExtentForChild(child, parentSize);
+    var childMainAxisExtent = preferredMainAxisContentExtentForChild(child, parentSize, i);
     var childMainAxisMarginBorderPadding = 0; // TODO add this call in.
 
     var childFlexBaseSize = childMainAxisExtent + childMainAxisMarginBorderPadding;
-    var childMinMaxAppliedMainAxisExtent = adjustChildSizeForMinAndMax(child, childMainAxisExtent, parentSize);
+    var childMinMaxAppliedMainAxisExtent = adjustChildSizeForMinAndMax(child, childMainAxisExtent, parentSize, i);
 
     var childHypotheticalMainSize = childMinMaxAppliedMainAxisExtent + childMainAxisMarginBorderPadding;
 
     // NOTE skipped out of multiline here.
 
     metrics.sumFlexBaseSize += childFlexBaseSize;
-    metrics.totalFlexGrow += flexGrow(child);
-    metrics.totalWeightedFlexShrink += flexShrink(child) * childMainAxisExtent;
+    metrics.totalFlexGrow += flexGrow(child, i);
+    metrics.totalWeightedFlexShrink += flexShrink(child, i) * childMainAxisExtent;
     metrics.sumHypotheticalMainSize += childHypotheticalMainSize;
   }
 
@@ -160,10 +172,10 @@ var freezeViolations = function(violations, metrics, inflexibleItems, parentSize
   for (var i = 0; i < violations.length; i++) {
     var child = violations[i].child;
     var childSize = violations[i].size;
-    var preferredChildSize = preferredMainAxisContentExtentForChild(child, parentSize);
+    var preferredChildSize = preferredMainAxisContentExtentForChild(child, parentSize, i);
     metrics.availibleFreeSpace -= childSize - preferredChildSize;
-    metrics.totalFlexGrow -= flexGrow(child);
-    metrics.totalWeightedFlexShrink -= flexShrink(child) * preferredChildSize;
+    metrics.totalFlexGrow -= flexGrow(child, i);
+    metrics.totalWeightedFlexShrink -= flexShrink(child, i) * preferredChildSize;
     inflexibleItems.set(child, childSize);
   }
 };
@@ -182,19 +194,19 @@ var resolveFlexibleLengths = function(flexSign, children, childSizes, inflexible
     if (inflexibleItems.has(child) > 0) {
       childSizes.push(inflexibleItems.get(child));
     } else {
-      var preferredChildSize = preferredMainAxisContentExtentForChild(child, parentSize);
+      var preferredChildSize = preferredMainAxisContentExtentForChild(child, parentSize, i);
       var childSize = preferredChildSize;
       var extraSpace = 0;
       if (metrics.availibleFreeSpace > 0 && metrics.totalFlexGrow > 0 && flexSign == '+') { // WTF is std::isfinite(totalFlexGrow) doing?
-        var childFlexGrow = flexGrow(child);
+        var childFlexGrow = flexGrow(child, i);
         extraSpace = metrics.availibleFreeSpace * childFlexGrow / metrics.totalFlexGrow;
       } else if (metrics.availibleFreeSpace < 0 && metrics.totalWeightedFlexShrink > 0 && flexSign == '-') {
-        extraSpace = metrics.availibleFreeSpace * flexShrink(child) * preferredChildSize / metrics.totalWeightedFlexShrink;
+        extraSpace = metrics.availibleFreeSpace * flexShrink(child, i) * preferredChildSize / metrics.totalWeightedFlexShrink;
       }
 
       childSize += extraSpace;
 
-      var adjustedChildSize = adjustChildSizeForMinAndMax(child, childSize, parentSize);
+      var adjustedChildSize = adjustChildSizeForMinAndMax(child, childSize, parentSize, i);
       childSizes.push(adjustedChildSize);
       usedFreeSpace += adjustedChildSize - preferredChildSize;
 
@@ -227,11 +239,11 @@ var measureChildrenHeight = function(children, childSizes) {
     // NOTE skipped out of flow positioned child.
 
     var childPreferredSize = childSizes[i]; // TODO border and padding for child.
-    child.constrainWidth(childPreferredSize); // TODO probably a better name for this.
+    //child.constrainWidth(childPreferredSize); // TODO probably a better name for this.
 
     // NOTE skipped collapsing margins.
 
-    crossAxis = Math.max(crossAxis, child.measureHeight()); // NOTE skipping margins and all sorts of things here.
+    crossAxis = Math.max(crossAxis, child.measureHeightAndConstrain(childPreferredSize)); // NOTE skipping margins and all sorts of things here.
   }
 
   return crossAxis;
@@ -255,7 +267,7 @@ self.calculateHeight = function(node) {
 
 self.positionChildren = function(node) {
   var orderedChildren = sortChildren(node.children);
-  var justifyContent = node.getCSSValue('justify-content');
+  var justifyContent = cssJustifyContent; //node.getCSSValue('justify-content');
 
   var availibleFreeSpace = node.width;
   for (var i = 0; i < orderedChildren.length; i++) {
@@ -268,7 +280,7 @@ self.positionChildren = function(node) {
     var child = orderedChildren[i];
     var crossAxisOffset;
 
-    switch (alignSelf(child)) {
+    switch (alignSelf(child, i)) {
       case 'flex-end':
         crossAxisOffset = node.height - child.height;
         break;

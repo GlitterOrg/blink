@@ -35,6 +35,9 @@ public:
     ScriptValue fn() const { return m_fnValue; }
     void setFn(ScriptValue& value) { m_fnValue = value; }
 
+    ScriptValue doLayout() const { return m_doLayoutValue; }
+    void setDoLayout(ScriptValue& value) { m_doLayoutValue = value; }
+
     ScriptValue calculateMinContentInlineSize() const { return m_calculateMinContentInlineSize; }
     void setCalculateMinContentInlineSize(ScriptValue& value) { m_calculateMinContentInlineSize = value; }
 
@@ -95,6 +98,7 @@ private:
     DOMTimerCoordinator m_timers;
     OwnPtr<MainThreadTaskRunner> m_taskRunner;
     ScriptValue m_fnValue;
+    ScriptValue m_doLayoutValue;
     ScriptValue m_calculateMinContentInlineSize;
     ScriptValue m_calculateMaxContentInlineSize;
     ScriptValue m_calculateWidth;

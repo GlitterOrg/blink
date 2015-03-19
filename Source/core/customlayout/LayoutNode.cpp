@@ -48,6 +48,7 @@ WillBeHeapVector<LayoutChild*> LayoutNode::children() const
 
 String LayoutNode::getCSSValue(String value) const
 {
+    //TRACE_EVENT0("blink", "LayoutNode::getCSSValue");
     const Property* hashTableEntry = findProperty(value.ascii().data(), value.length());
     if (!hashTableEntry)
         return "";
@@ -58,16 +59,30 @@ String LayoutNode::getCSSValue(String value) const
 
 double LayoutNode::width() const
 {
-  return m_renderBox->size().width().toDouble(); // should be inline size. need to add safety here.
+    return m_renderBox->size().width().toDouble(); // should be inline size. need to add safety here.
 }
 
 double LayoutNode::height() const
 {
-  return m_renderBox->size().height().toDouble(); // should be box size. need to add safety here.
+    return m_renderBox->size().height().toDouble(); // should be box size. need to add safety here.
 }
+
+void LayoutNode::setWidth(double width)
+{
+    LayoutUnit w(width);
+    m_renderBox->setLogicalWidth(w);
+}
+
+void LayoutNode::setHeight(double height)
+{
+    LayoutUnit h(height);
+    m_renderBox->setLogicalHeight(h);
+}
+
 void LayoutNode::log(String str) const
 {
     WTF_LOG(NotYetImplemented, "log: %s\n", str.ascii().data());
 }
+
 
 }

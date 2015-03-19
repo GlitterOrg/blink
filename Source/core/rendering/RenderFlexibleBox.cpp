@@ -220,6 +220,7 @@ void RenderFlexibleBox::styleDidChange(StyleDifference diff, const LayoutStyle* 
 
 void RenderFlexibleBox::layoutBlock(bool relayoutChildren)
 {
+    TRACE_EVENT0("blink", "RenderFlexibleBox::layoutBlock");
     ASSERT(needsLayout());
 
     if (!relayoutChildren && simplifiedLayout())

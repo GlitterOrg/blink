@@ -22,6 +22,10 @@ public:
     String getCSSValue(String value) const;
     double width() const;
     double height() const;
+
+    void setWidth(double);
+    void setHeight(double);
+
     void log(String) const;
 
 private:

@@ -6,6 +6,7 @@
 
     attribute Function calculateMinContentInlineSize;
     attribute Function calculateMaxContentInlineSize;
+    attribute Function doLayout; // should be calculateInlineSize
     attribute Function calculateWidth; // should be calculateInlineSize
     attribute Function calculateHeight; // should be calculateBoxSize?
     attribute Function positionChildren;

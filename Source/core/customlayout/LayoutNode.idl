@@ -9,4 +9,6 @@ interface LayoutNode {
 
     void log(DOMString str);
 
+    void setWidth(double width);
+    void setHeight(double height);
 };

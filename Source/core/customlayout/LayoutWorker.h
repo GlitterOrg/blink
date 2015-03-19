@@ -23,8 +23,12 @@ public:
     virtual ~LayoutWorker();
 
     const AtomicString& type() const;
+
+    void dirtyProperties() { m_dirtyProperties = true; };
+
     double invoke(double, double) const;
 
+    void doLayout(RenderCustomBox&);
     void computeIntrinsicLogicalWidths(LayoutUnit&, LayoutUnit&, RenderCustomBox&);
 
     void calculateWidth(LayoutUnit&, RenderCustomBox&);
@@ -44,6 +48,7 @@ private:
 
     RefPtr<WorkerScriptLoader> m_scriptLoader;
     RefPtrWillBePersistent<LayoutGlobalScope> m_layoutGlobalScope;
+    bool m_dirtyProperties;
 };
 } // namespace blink
 

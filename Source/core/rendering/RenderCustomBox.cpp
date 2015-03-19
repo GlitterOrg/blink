@@ -29,39 +29,20 @@ void RenderCustomBox::computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth,
 
 void RenderCustomBox::layoutBlock(bool relayoutChildren)
 {
+    TRACE_EVENT0("blink", "RenderCustomBox::layoutBlock");
     ASSERT(needsLayout());
 
     if (!relayoutChildren && simplifiedLayout())
         return;
 
     LayoutWorker* layout = toElement(node())->layout();
-
-    // Calculate & update the width.
-    LayoutUnit width(0);
-    layout->calculateWidth(width, *this);
-    setLogicalWidth(width);
-
     LayoutUnit previousHeight = logicalHeight();
-    setLogicalHeight(borderAndPaddingLogicalHeight() + scrollbarLogicalHeight());
 
     {
         TextAutosizer::LayoutScope textAutosizerLayoutScope(this);
         LayoutState state(*this, locationOffset());
 
-        // Layout children here, just incase we don't have it done.
-        for (RenderBox* child = firstChildBox(); child; child = child->nextSiblingBox()) {
-            child->layoutIfNeeded();
-            child->setLocation(LayoutPoint(0, 0));
-        }
-
-        // Calculate height... note constraints may be placed on children in
-        // this phase?
-        LayoutUnit height(0);
-        layout->calculateHeight(height, *this);
-        setLogicalHeight(height);
-
-        // Position children.
-        layout->positionChildren(*this);
+        layout->doLayout(*this);
 
         if (logicalHeight() != previousHeight)
             relayoutChildren = true;

@@ -26,7 +26,9 @@ public:
 
     double measureWidth();
     double measureWidthUsing(String, double, bool);
+    double measureWidthUsingFixed(double, double, bool);
     double measureHeight();
+    double measureHeightAndConstrain(double);
 
     double width() const;
     double height() const;
