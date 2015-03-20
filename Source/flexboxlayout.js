@@ -29,6 +29,11 @@ self.calculateMaxContentInlineSize = function(node) {
 };
 
 self.calculateWidth = function(node) {
+  var overrideWidth = node.overrideWidth; // TODO this should be part of argument.
+  if (overrideWidth >= 0) {
+    return overrideWidth;
+  }
+
   var width = node.getCSSValue('width');
 
   // Might have a fixed width or percent.

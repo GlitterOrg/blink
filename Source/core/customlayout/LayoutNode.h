@@ -21,6 +21,7 @@ public:
 
     String getCSSValue(String value) const;
     double width() const;
+    double overrideWidth() const;
     double height() const;
 
     void setWidth(double);

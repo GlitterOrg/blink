@@ -24,7 +24,7 @@ public:
 
     const AtomicString& type() const;
 
-    void dirtyProperties() { m_dirtyProperties = true; };
+    void dirtyProperties() { /*m_dirtyProperties = true;*/ };
 
     double invoke(double, double) const;
 

@@ -1,0 +1,69 @@
+<html>
+  <body>
+    <div id="entry" style="width: 1000px"></div>
+  </body>
+  <script>
+    var NATIVE_LAYOUT = window.location.search.indexOf('native') > 0;
+    var BRANCH = 2;
+
+    var addChildren = function(node, depth) {
+      for (var i = 0; i < BRANCH; i++) {
+        var el = document.createElement('div');
+        el.style.flexBasis = '80px';
+        el.style.flexGrow = '' + i;
+        node.appendChild(el);
+        if (depth == 0) {
+          el.innerText = text[i];
+        } else {
+          addChildren(el, depth - 1);
+        }
+      }
+    };
+
+    var addLayout = function(node, layouts, depth) {
+      if (NATIVE_LAYOUT) {
+        node.style.display = 'flex';
+      } else {
+        node.layout = layouts.shift();
+      }
+      for (var i = 0; i < BRANCH; i++) {
+        var el = node.children[i];
+        if (depth != 0) {
+          addLayout(el, layouts, depth - 1);
+        }
+      }
+    };
+
+    var N = 3;
+    var curr = document.getElementById('entry');
+    var text = ['foo foo foo', 'bbb bbb bbb', 'ccc cc'];
+
+    var num = (Math.pow(BRANCH,N+1) - 1) / (BRANCH - 1);
+    var layouts = [];
+    for (var i = 0; i < num; i++) {
+      layouts.push(new LayoutWorker('flexboxlayout.js'));
+    }
+    addChildren(document.getElementById('entry'), N);
+
+    setTimeout(function() {
+      addLayout(document.getElementById('entry'), layouts, N);
+    }, 500);
+
+    var vals = [];
+    var benchmark = function(el) {
+        vals = [];
+        var start = window.performance.now();
+        for (var i = 100; i < 400; i++) {
+          el.style.width = i + 'px';
+          vals.push(el.children[1].offsetTop);
+          el.children[0].flexGrow = i % BRANCH;
+          vals.push(el.children[1].offsetTop);
+        }
+        console.log(window.performance.now() - start);
+    };
+
+    setTimeout(function() {
+      benchmark(document.getElementById('entry'));
+    }, 600);
+  </script>
+</html>

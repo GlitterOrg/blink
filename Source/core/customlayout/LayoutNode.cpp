@@ -62,6 +62,11 @@ double LayoutNode::width() const
     return m_renderBox->size().width().toDouble(); // should be inline size. need to add safety here.
 }
 
+double LayoutNode::overrideWidth() const
+{
+    return (double) (m_renderBox->hasOverrideWidth() ? m_renderBox->overrideLogicalContentWidth().toDouble() : -1.0);
+}
+
 double LayoutNode::height() const
 {
     return m_renderBox->size().height().toDouble(); // should be box size. need to add safety here.

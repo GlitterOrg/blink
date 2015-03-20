@@ -7,6 +7,8 @@ interface LayoutNode {
     readonly attribute double width; // Should be inline size, should only be availible in calculateHeight phase.
     readonly attribute double height; // Should be box size, should only be availible in calculateHeight phase.
 
+    readonly attribute double overrideWidth;
+
     void log(DOMString str);
 
     void setWidth(double width);

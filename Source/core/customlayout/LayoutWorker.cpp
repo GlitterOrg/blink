@@ -107,14 +107,15 @@ void LayoutWorker::doLayout(RenderCustomBox& renderer)
         int i = 0;
 
         for (RenderBox* child = renderer.firstChildBox(); child; child = child->nextSiblingBox()) {
+            Node* node = child->node() ? child->node() : child->parent()->node();
             v8::Handle<v8::Array> dict = v8::Array::New(isolate, 7);
             dict->Set(0, v8::Number::New(isolate, child->style()->flexGrow()));
             dict->Set(1, v8::Number::New(isolate, child->style()->flexShrink()));
-            dict->Set(2, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyFlexBasis, child->styleRef(), child, child->node())->cssText().ascii().data()));
-            dict->Set(3, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyWidth, child->styleRef(), child, child->node())->cssText().ascii().data()));
-            dict->Set(4, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyAlignSelf, child->styleRef(), child, child->node())->cssText().ascii().data()));
-            dict->Set(5, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyMaxWidth, child->styleRef(), child, child->node())->cssText().ascii().data()));
-            dict->Set(6, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyMinWidth, child->styleRef(), child, child->node())->cssText().ascii().data()));
+            dict->Set(2, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyFlexBasis, child->styleRef(), child, node)->cssText().ascii().data()));
+            dict->Set(3, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyWidth, child->styleRef(), child, node)->cssText().ascii().data()));
+            dict->Set(4, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyAlignSelf, child->styleRef(), child, node)->cssText().ascii().data()));
+            dict->Set(5, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyMaxWidth, child->styleRef(), child, node)->cssText().ascii().data()));
+            dict->Set(6, v8::String::NewFromUtf8(isolate, LayoutStyleCSSValueMapping::get(CSSPropertyMinWidth, child->styleRef(), child, node)->cssText().ascii().data()));
 
             properties->Set(i++, dict);
         }
