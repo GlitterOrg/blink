@@ -1,5 +1,7 @@
 #include "config.h"
 
+#include "bindings/core/v8/ScriptPromise.h"
+#include "bindings/core/v8/ScriptState.h"
 #include "core/customlayout/LayoutChild.h"
 #include "core/rendering/RenderBox.h"
 #include "core/dom/Document.h"
@@ -59,7 +61,7 @@ void LayoutChild::setPosition(double x, double y)
 
 void LayoutChild::constrainWidth(double width)
 {
-    TRACE_EVENT0("blink", "LayoutChild::constrainWidth");
+    //TRACE_EVENT0("blink", "LayoutChild::constrainWidth");
     m_renderBox->setOverrideLogicalContentWidth(width);
     //m_renderBox->setNeedsLayout(MarkOnlyThis);
     //m_renderBox->layout();
@@ -94,7 +96,7 @@ double LayoutChild::measureWidthUsing(String widthStr, double availibleSpace, bo
     return m_renderBox->computeLogicalWidthUsing(sizeType, size, space, m_renderBox->containingBlock()).toDouble();
 }
 
-double LayoutChild::measureWidthUsingFixed(double widthPx, double availibleSpace, bool mainSize)
+ScriptPromise LayoutChild::measureWidthUsingFixed(ScriptState* scriptState, double widthPx, double availibleSpace, bool mainSize)
 {
     //TRACE_EVENT0("blink", "LayoutChild::measureWidthUsingFixed");
     SizeType sizeType = mainSize ? MainOrPreferredSize : MinSize; // TODO accept MaxSize
@@ -103,7 +105,7 @@ double LayoutChild::measureWidthUsingFixed(double widthPx, double availibleSpace
 
     double result = m_renderBox->computeLogicalWidthUsing(sizeType, size, space, m_renderBox->containingBlock()).toDouble();
     WTF_LOG(NotYetImplemented, "measureWidthUsingFixed: %lf, %lf, %lf, %d", widthPx, availibleSpace, result, mainSize);
-    return result;
+    return ScriptPromise::cast(scriptState, v8::Number::New(scriptState->isolate(), result));
 }
 
 double LayoutChild::measureHeight()
@@ -114,13 +116,13 @@ double LayoutChild::measureHeight()
     return height();
 }
 
-double LayoutChild::measureHeightAndConstrain(double width)
+ScriptPromise LayoutChild::measureHeightAndConstrain(ScriptState* scriptState, double width)
 {
     //TRACE_EVENT0("blink", "LayoutChild::measureHeight");
     m_renderBox->setOverrideLogicalContentWidth(width);
     m_renderBox->setNeedsLayout(MarkOnlyThis);
     m_renderBox->forceChildLayout();
-    return height();
+    return ScriptPromise::cast(scriptState, v8::Number::New(scriptState->isolate(), height()));
 }
 
 double LayoutChild::width() const

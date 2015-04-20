@@ -8,6 +8,8 @@
 namespace blink {
 
 class RenderBox;
+class ScriptState;
+class ScriptPromise;
 
 class LayoutChild : public RefCountedWillBeGarbageCollectedFinalized<LayoutChild>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
@@ -26,9 +28,9 @@ public:
 
     double measureWidth();
     double measureWidthUsing(String, double, bool);
-    double measureWidthUsingFixed(double, double, bool);
+    ScriptPromise measureWidthUsingFixed(ScriptState*, double, double, bool);
     double measureHeight();
-    double measureHeightAndConstrain(double);
+    ScriptPromise measureHeightAndConstrain(ScriptState*, double);
 
     double width() const;
     double height() const;

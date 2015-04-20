@@ -10,9 +10,9 @@ interface LayoutChild {
 
     double measureWidth();
     double measureWidthUsing(DOMString widthStr, double availibleSpace, boolean mainSize);
-    double measureWidthUsingFixed(double widthPx, double availibleSpace, boolean mainSize);
+    [CallWith=ScriptState] Promise<double> measureWidthUsingFixed(double widthPx, double availibleSpace, boolean mainSize);
     double measureHeight();
-    double measureHeightAndConstrain(double width);
+    [CallWith=ScriptState] Promise<double> measureHeightAndConstrain(double width);
 
     readonly attribute double width;
     readonly attribute double height;

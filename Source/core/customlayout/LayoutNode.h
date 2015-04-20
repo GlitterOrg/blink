@@ -9,6 +9,8 @@ namespace blink {
 class LayoutChild;
 class LayoutParent;
 class RenderBox;
+class ScriptState;
+class ScriptPromise;
 
 class LayoutNode : public RefCountedWillBeGarbageCollectedFinalized<LayoutNode>, public ScriptWrappable {
     DEFINE_WRAPPERTYPEINFO();
@@ -25,11 +27,13 @@ public:
     double height() const;
 
     void setWidth(double);
-    void setHeight(double);
+    void setHeight(ScriptState* scriptState, ScriptPromise& heightPromise);
+    void setHeightInternal(double);
 
     void log(String) const;
 
 private:
+    class ThenFunction;
     LayoutNode(RenderBox*);
 
     RenderBox* m_renderBox;

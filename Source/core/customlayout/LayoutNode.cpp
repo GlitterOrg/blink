@@ -1,4 +1,7 @@
 #include "config.h"
+#include "bindings/core/v8/ScriptPromise.h"
+#include "bindings/core/v8/ScriptState.h"
+#include "bindings/core/v8/ScriptFunction.h"
 #include "core/customlayout/LayoutNode.h"
 #include "core/customlayout/LayoutParent.h"
 #include "core/customlayout/LayoutChild.h"
@@ -10,6 +13,35 @@
 #include "platform/Logging.h"
 
 namespace blink {
+
+class LayoutNode::ThenFunction final : public ScriptFunction {
+public:
+    static v8::Local<v8::Function> createFunction(ScriptState* scriptState, LayoutNode* layoutNode)
+    {
+        ThenFunction* self = new ThenFunction(scriptState, layoutNode);
+        return self->bindToV8Function();
+    }
+
+    DEFINE_INLINE_VIRTUAL_TRACE()
+    {
+        ScriptFunction::trace(visitor);
+    }
+
+private:
+    ThenFunction(ScriptState* scriptState, LayoutNode* layoutNode)
+        : ScriptFunction(scriptState)
+        , m_node(layoutNode)
+    {
+    }
+
+    ScriptValue call(ScriptValue value) override
+    {
+        m_node->setHeightInternal(value.v8Value().As<v8::Number>()->Value());
+        return ScriptValue();
+    }
+
+    LayoutNode* m_node;
+};
 
 PassRefPtrWillBeRawPtr<LayoutNode> LayoutNode::create(RenderBox* renderBox)
 {
@@ -78,8 +110,16 @@ void LayoutNode::setWidth(double width)
     m_renderBox->setLogicalWidth(w);
 }
 
-void LayoutNode::setHeight(double height)
+void LayoutNode::setHeight(ScriptState* scriptState, ScriptPromise& heightPromise)
 {
+    WTF_LOG(NotYetImplemented, "hit: setHeight\n");
+    heightPromise.then(ThenFunction::createFunction(scriptState, this));
+    scriptState->isolate()->RunMicrotasks();
+}
+
+void LayoutNode::setHeightInternal(double height)
+{
+    WTF_LOG(NotYetImplemented, "hit: setHeightInternal, %lf\n", height);
     LayoutUnit h(height);
     m_renderBox->setLogicalHeight(h);
 }

@@ -12,5 +12,5 @@ interface LayoutNode {
     void log(DOMString str);
 
     void setWidth(double width);
-    void setHeight(double height);
+    [CallWith=ScriptState] void setHeight(Promise height);
 };

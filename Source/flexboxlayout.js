@@ -5,8 +5,8 @@ self.fn = function(args) {
 self.doLayout = function(node) {
   var width = self.calculateWidth(node);
   node.setWidth(width);
-  var height = self.calculateHeight(node);
-  node.setHeight(height);
+  var heightPromise = self.calculateHeight(node);
+  node.setHeight(heightPromise);
   self.positionChildren(node);
 };
 
@@ -54,6 +54,8 @@ self.calculateWidth = function(node) {
   return node.parent.width;
 };
 
+var log;
+
 var flexGrow = function(child, i) {
   return props[i][0]; //props[i]['flex-grow']; // Number(child.getCSSValue('flex-grow')) || 0;
 };
@@ -84,23 +86,23 @@ var preferredMainAxisContentExtentForChild = function(child, parentSize, i) {
 
   var flexBasisStr = flexBasisForChild(child, i);
   if (flexBasisStr == 'auto') { // preferredMainAxisExtentDependsOnLayout
-    return child.maxContentInlineSize();
+    return Promise.resolve(child.maxContentInlineSize());
   }
 
   if (flexBasisStr.endsWith('px')) {
-    return Math.max(0, child.measureWidthUsingFixed(parseInt(flexBasisStr, 10), parentSize, true));
+    return child.measureWidthUsingFixed(parseInt(flexBasisStr, 10), parentSize, true).then(function(val) {
+      return Math.max(0, val);
+    });
   } else {
-    return Math.max(0, child.measureWidthUsing(flexBasisStr, parentSize, true));
+    return Promise.resolve(Math.max(0, child.measureWidthUsing(flexBasisStr, parentSize, true)));
   }
 };
 
 var adjustChildSizeForMinAndMax = function(child, childSize, parentSize, i) {
   var max = props[i][5]; //props[i]['max-width']; // child.getCSSValue('max-width');
+  var maxExtent = null;
   if (max.endsWith('px')) {
-    var maxExtent = child.measureWidthUsingFixed(parseInt(max, 10), parentSize, false);
-    if (maxExtent != -1 && childSize > maxExtent) {
-      childSize = maxExtent;
-    }
+    maxExtent = child.measureWidthUsingFixed(parseInt(max, 10), parentSize, false);
   }
 
   var min = props[i][6]; //props[i]['min-width']; //child.getCSSValue('min-width');
@@ -109,7 +111,16 @@ var adjustChildSizeForMinAndMax = function(child, childSize, parentSize, i) {
     minExtent = child.measureWidthUsingFixed(parseInt(min, 10), parentSize, false);
   }
 
-  return Math.max(childSize, minExtent);
+  return Promise.all([minExtent, maxExtent]).then(function(values) {
+    var min = values[0];
+    var max = values[1];
+
+    if (max != null && max != -1 && childSize > max) {
+      childSize = max;
+    }
+
+    return Math.max(childSize, min);
+  });
 };
 
 var initialJustifyContentOffset = function(availibleFreeSpace, justifyConent, numChildren) {
@@ -147,96 +158,178 @@ var computeFlexMetrics = function(children, parentSize) {
     sumHypotheticalMainSize: 0,
     availibleFreeSpace: 0
   };
+  var mainAxisExtents = [];
 
   for (var i = 0; i < children.length; i++) {
     // NOTE skipped out of flow positioned children here.
     var child = children[i];
 
-    var childMainAxisExtent = preferredMainAxisContentExtentForChild(child, parentSize, i);
-    var childMainAxisMarginBorderPadding = 0; // TODO add this call in.
-
-    var childFlexBaseSize = childMainAxisExtent + childMainAxisMarginBorderPadding;
-    var childMinMaxAppliedMainAxisExtent = adjustChildSizeForMinAndMax(child, childMainAxisExtent, parentSize, i);
-
-    var childHypotheticalMainSize = childMinMaxAppliedMainAxisExtent + childMainAxisMarginBorderPadding;
+    mainAxisExtents.push(preferredMainAxisContentExtentForChild(child, parentSize, i));
 
     // NOTE skipped out of multiline here.
 
-    metrics.sumFlexBaseSize += childFlexBaseSize;
     metrics.totalFlexGrow += flexGrow(child, i);
-    metrics.totalWeightedFlexShrink += flexShrink(child, i) * childMainAxisExtent;
-    metrics.sumHypotheticalMainSize += childHypotheticalMainSize;
   }
 
-  metrics.availibleFreeSpace = parentSize - metrics.sumFlexBaseSize;
+  return Promise.all(mainAxisExtents).then(function(extents) {
+    var appliedMainAxisExtents = [];
 
-  return metrics;
+    for (var i = 0; i < extents.length; i++) {
+      appliedMainAxisExtents.push(adjustChildSizeForMinAndMax(children[i], extents[i], parentSize, i));
+      metrics.sumFlexBaseSize += extents[i];
+      metrics.totalWeightedFlexShrink += flexShrink(children[i], i) * extents[i];
+    }
+
+    return Promise.all(appliedMainAxisExtents).then(function(appliedExtents) {
+      for (var i = 0; i < appliedExtents.length; i++) {
+        metrics.sumHypotheticalMainSize += appliedExtents[i];
+      }
+
+      metrics.availibleFreeSpace = parentSize - metrics.sumFlexBaseSize;
+
+      return metrics;
+    });
+  });
 };
 
-var freezeViolations = function(violations, metrics, inflexibleItems, parentSize) {
+var makePreferredChildSizeDict = function(promise, child, i, size) {
+  return promise.then(function(preferredSize) {
+    return {
+      child: child,
+      i: i,
+      preferredSize: preferredSize,
+      size: size
+    };
+  });
+};
+
+var makeAdjustedChildSizeDict = function(promise, child, i, preferredSize, size) {
+  return promise.then(function(adjustedSize) {
+    return {
+      child: child,
+      i: i,
+      preferredSize: preferredSize,
+      adjustedSize: adjustedSize,
+      size: size
+    };
+  });
+};
+
+var freezeViolations = function(violations, metrics, inflexibleItems, parentSize) { // TODO make into promise.
+  var preferredChildSizeDicts = [];
   for (var i = 0; i < violations.length; i++) {
     var child = violations[i].child;
     var childSize = violations[i].size;
-    var preferredChildSize = preferredMainAxisContentExtentForChild(child, parentSize, i);
-    metrics.availibleFreeSpace -= childSize - preferredChildSize;
-    metrics.totalFlexGrow -= flexGrow(child, i);
-    metrics.totalWeightedFlexShrink -= flexShrink(child, i) * preferredChildSize;
-    inflexibleItems.set(child, childSize);
+    preferredChildSizeDicts.push(makePreferredChildSizeDict(
+        preferredMainAxisContentExtentForChild(child, parentSize, i),
+        child,
+        i,
+        childSize));
   }
+
+  return Promise.all(preferredChildSizeDicts).then(function(dicts) {
+    for (var i = 0; i < dicts.length; i++) {
+      metrics.availibleFreeSpace -= dict.size - dict.preferredSize;
+      metrics.totalFlexGrow -= flexGrow(dict.child, dict.i);
+      metrics.totalWeightedFlexShrink -= flexShrink(dict.child, dict.i) * dict.preferredSize;
+      inflexibleItems.set(dict.child, dict.size);
+    }
+  });
+};
+
+var resolveFlexibleLengthsOuter = function(flexSign, children, childSizes, inflexibleItems, metrics, parentSize) {
+  return new Promise(function(resolve, reject) {
+    var fn = function() {
+      resolveFlexibleLengths(flexSign, children, childSizes, inflexibleItems, metrics, parentSize).then(function(finished) {
+        if (finished) {
+          resolve(true);
+        } else {
+          fn();
+        }
+      });
+    };
+
+    fn();
+  });
 };
 
 var resolveFlexibleLengths = function(flexSign, children, childSizes, inflexibleItems, metrics, parentSize) {
   childSizes.length = 0;
-  var totalViolation = 0;
-  var usedFreeSpace = 0;
-  var minViolations = [];
-  var maxViolations = [];
+
+  var preferredChildSizeDicts = [];
 
   for (var i = 0; i < children.length; i++) {
     var child = children[i];
     // NOTE skipped out of flow positioned child here.
 
     if (inflexibleItems.has(child) > 0) {
-      childSizes.push(inflexibleItems.get(child));
+      childSizes[i] = inflexibleItems.get(child);
     } else {
-      var preferredChildSize = preferredMainAxisContentExtentForChild(child, parentSize, i);
-      var childSize = preferredChildSize;
-      var extraSpace = 0;
-      if (metrics.availibleFreeSpace > 0 && metrics.totalFlexGrow > 0 && flexSign == '+') { // WTF is std::isfinite(totalFlexGrow) doing?
-        var childFlexGrow = flexGrow(child, i);
-        extraSpace = metrics.availibleFreeSpace * childFlexGrow / metrics.totalFlexGrow;
-      } else if (metrics.availibleFreeSpace < 0 && metrics.totalWeightedFlexShrink > 0 && flexSign == '-') {
-        extraSpace = metrics.availibleFreeSpace * flexShrink(child, i) * preferredChildSize / metrics.totalWeightedFlexShrink;
-      }
-
-      childSize += extraSpace;
-
-      var adjustedChildSize = adjustChildSizeForMinAndMax(child, childSize, parentSize, i);
-      childSizes.push(adjustedChildSize);
-      usedFreeSpace += adjustedChildSize - preferredChildSize;
-
-      var violation = adjustedChildSize - childSize;
-      if (violation > 0) {
-        minViolations.push({child: child, size: adjustedChildSize});
-      } else if (violation) {
-        maxViolations.push({child: child, size: adjustedChildSize});
-      }
-
-      totalViolation += violation;
+      preferredChildSizeDicts.push(makePreferredChildSizeDict(
+          preferredMainAxisContentExtentForChild(child, parentSize, i),
+          child,
+          i));
     }
   }
 
-  if (totalViolation) {
-    freezeViolations(totalViolation < 0 ? maxViolations : minViolations, metrics, inflexibleItems, parentSize);
-  } else {
-    metrics.availibleFreeSpace -= usedFreeSpace;
-  }
+  return Promise.all(preferredChildSizeDicts).then(function(dicts) {
+    var adjustedChildSizeDicts = [];
 
-  return !totalViolation;
+    for (var i = 0; i < dicts.length; i++) {
+      var dict = dicts[i];
+      var extraSpace = 0;
+
+      if (metrics.availibleFreeSpace > 0 && metrics.totalWeightedFlexShrink > 0 && flexSign == '+') {
+        var childFlexGrow = flexGrow(dict.child, dict.i);
+        extraSpace = metrics.availibleFreeSpace * childFlexGrow / metrics.totalFlexGrow;
+      } else if (metrics.availibleFreeSpace < 0 && metrics.totalWeightedFlexShrink > 0 && flexSign == '-') {
+        extraSpace = metrics.availibleFreeSpace * flexShrink(dict.child, dict.i) * dict.preferredSize / metrics.totalWeightedFlexShrink;
+      }
+
+      var childSize = dict.preferredSize + extraSpace;
+      adjustedChildSizeDicts.push(makeAdjustedChildSizeDict(
+          adjustChildSizeForMinAndMax(dict.child, childSize, parentSize, i),
+          dict.child,
+          dict.i,
+          dict.preferredSize,
+          childSize));
+    }
+
+    return Promise.all(adjustedChildSizeDicts).then(function(dicts) {
+      var minViolations = [];
+      var maxViolations = [];
+      var totalViolation = 0;
+      var usedFreeSpace = 0;
+
+      for (var i = 0; i < dicts.length; i++) {
+        var dict = dicts[i];
+        childSizes[dict.i] = dict.adjustedSize;
+        usedFreeSpace += dict.adjustedSize - dict.preferredSize;
+
+        var violation = dict.adjustedSize - dict.size;
+        if (violation > 0) {
+          minViolations.push({child: dict.child, size: dict.adjustedChildSize});
+        } else if (violation) {
+          maxViolations.push({child: dict.child, size: dict.adjustedChildSize});
+        }
+
+        totalViolation += violation;
+      }
+
+      if (totalViolation) {
+        return freezeViolations(totalViolation < 0 ? maxViolations : minViolations, metrics, inflexibleItems, parentSize).then(function() {
+          return false;
+        });
+      } else {
+        metrics.availibleFreeSpace -= usedFreeSpace;
+        return Promise.resolve(true);
+      }
+    });
+  });
 };
 
 var measureChildrenHeight = function(children, childSizes) {
-  var crossAxis = 0;
+  var heights = [];
 
   for (var i = 0; i < children.length; i++) {
     var child = children[i];
@@ -248,10 +341,16 @@ var measureChildrenHeight = function(children, childSizes) {
 
     // NOTE skipped collapsing margins.
 
-    crossAxis = Math.max(crossAxis, child.measureHeightAndConstrain(childPreferredSize)); // NOTE skipping margins and all sorts of things here.
+    heights.push(child.measureHeightAndConstrain(childPreferredSize)); // NOTE skipping margins and all sorts of things here.
   }
 
-  return crossAxis;
+  return Promise.all(heights).then(function(values) {
+    var crossAxis = 0;
+    for (var i = 0; i < values.length; i++) {
+      crossAxis = Math.max(crossAxis, values[i]);
+    }
+    return crossAxis;
+  });
 };
 
 self.calculateHeight = function(node) {
@@ -259,12 +358,14 @@ self.calculateHeight = function(node) {
   var containerMainInnerSize = node.width;
 
   var metrics = computeFlexMetrics(orderedChildren, containerMainInnerSize);
-  var flexSign = (metrics.sumHypotheticalMainSize < containerMainInnerSize) ? '+' : '-';
-  var inflexibleItems = new Map();
-  var childSizes = [];
-  while (!resolveFlexibleLengths(flexSign, orderedChildren, childSizes, inflexibleItems, metrics, containerMainInnerSize));
-
-  return measureChildrenHeight(orderedChildren, childSizes);
+  return metrics.then(function(val) {
+    var flexSign = (val.sumHypotheticalMainSize < containerMainInnerSize) ? '+' : '-';
+    var inflexibleItems = new Map();
+    var childSizes = [];
+    return resolveFlexibleLengthsOuter(flexSign, orderedChildren, childSizes, inflexibleItems, val, containerMainInnerSize).then(function() {
+      return measureChildrenHeight(orderedChildren, childSizes);
+    });
+  });
 };
 
 // self.growChildrenHeight = function(node) { };
